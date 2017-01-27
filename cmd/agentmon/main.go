@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("agentmon/%v (built w/%s)\n", agentmon.VERSION, runtime.Version())
+		fmt.Printf("agentmon/v%s (built w/%s)\n", agentmon.VERSION, runtime.Version())
 	}
 
 	fmt.Println("Hello, world")
