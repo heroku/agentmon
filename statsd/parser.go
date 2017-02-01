@@ -1,4 +1,4 @@
-package agentmon
+package statsd
 
 import (
 	"bytes"
