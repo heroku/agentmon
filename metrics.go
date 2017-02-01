@@ -1,6 +1,6 @@
 package agentmon
 
-type Measurement interface {
+type Measurement struct {
 	Name     string
 	Type     string
 	Value    float32
