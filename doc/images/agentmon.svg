@@ -15,7 +15,10 @@
    id="svg4859"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="agentmon.svg">
+   sodipodi:docname="agentmon.svg"
+   inkscape:export-filename="/home/apg/agentmon.png"
+   inkscape:export-xdpi="91.220001"
+   inkscape:export-ydpi="91.220001">
   <defs
      id="defs4861" />
   <sodipodi:namedview
@@ -26,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.2058594"
-     inkscape:cx="215.36281"
-     inkscape:cy="520"
+     inkscape:cx="212.87496"
+     inkscape:cy="254.6291"
      inkscape:document-units="px"
      inkscape:current-layer="g4842"
      showgrid="false"
@@ -58,7 +61,8 @@
       <g
          id="g5419"
          inkscape:export-xdpi="91.220001"
-         inkscape:export-ydpi="91.220001">
+         inkscape:export-ydpi="91.220001"
+         transform="translate(-121.38614,268.06756)">
         <g
            id="g4271">
           <path
