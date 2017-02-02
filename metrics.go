@@ -1,9 +1,12 @@
 package agentmon
 
+import "time"
+
 type Measurement struct {
-	Name     string
-	Type     string
-	Value    float32
-	Sample   float32
-	Modifier string
+	Name      string
+	Timestamp time.Time
+	Type      string
+	Value     float64
+	Sample    float32
+	Modifier  string
 }

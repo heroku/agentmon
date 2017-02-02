@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/heroku/agentmon"
 )
@@ -180,10 +181,11 @@ func (p *StatsdParser) parseLine(line []byte) (*agentmon.Measurement, error) {
 	}
 
 	out := &agentmon.Measurement{
-		Name:   string(name),
-		Type:   string(measureType),
-		Value:  float32(value),
-		Sample: sample,
+		Name:      string(name),
+		Timestamp: time.Now(),
+		Type:      string(measureType),
+		Value:     value,
+		Sample:    sample,
 	}
 
 	if sign > 0 {
