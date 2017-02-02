@@ -70,8 +70,8 @@ loop:
 			}
 			ei++
 		case <-time.After(2 * time.Millisecond):
-			if ei != len(expected) {
-				t.Fatalf("Expected a measurement but didn't find one.")
+			if len(expected) != ei {
+				t.Fatalf("Expected to receive %d measurements, found %d", len(expected), ei)
 			}
 			break loop
 		}
