@@ -6,3 +6,9 @@ build:
 
 install:
 	go install -a -ldflags "-X ${LINKER_VERSION_SYMBOL} ${LINKER_VERSION}" ./...
+
+test:
+	CGO_ENABLED=1 go test -race ./...
+
+bench:
+	go test -v -bench . ./...
