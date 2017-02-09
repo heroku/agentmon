@@ -1,6 +1,6 @@
 # agentmon: Secret Dyno Metrics Agent Mon
 
-![](doc/images/agentmon.svg)
+![agent mon](https://i.imgur.com/0qtodUm.png)
 
 ## Overview
 
