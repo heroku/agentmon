@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"encoding/json"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -17,16 +17,21 @@ func makeTestHandler(t *testing.T, found chan string) http.Handler {
 		var set agentmon.MeasurementSet
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&set)
-    if err != nil {
+		if err != nil {
 			t.Fatalf("decode: %s", err)
-    }
-    defer r.Body.Close()
+		}
+		defer r.Body.Close()
 
 		if set.Len() > 0 {
 			for k := range set.Counters {
-
+				found <- k
 			}
-		})
+
+			for k := range set.Gauges {
+				found <- k
+			}
+		}
+	})
 }
 
 func TestMainStatsdEndToEnd(t *testing.T) {
@@ -37,10 +42,8 @@ func TestMainStatsdEndToEnd(t *testing.T) {
 	inbox := make(chan *agentmon.Measurement, 100)
 	found := make(chan string, 1)
 
-	handler :=
-	}
-
-	testServer := httptest.NewServer(http.HandlerFunc(handler))
+	handler := makeTestHandler(t, found)
+	testServer := httptest.NewServer(handler)
 	defer testServer.Close()
 
 	startReporter(ctx, 100*time.Millisecond, testServer.URL, inbox)
@@ -60,6 +63,10 @@ func TestMainStatsdEndToEnd(t *testing.T) {
 	select {
 	case <-time.After(1 * time.Second):
 		t.Errorf("no metric found in 1 second.")
+	case m := <-found:
+		if m != "gorets" {
+			t.Errorf("got %s, want %s", m, "gorets")
+		}
 	}
 	cancel()
 }
