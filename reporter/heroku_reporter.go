@@ -15,6 +15,9 @@ import (
 
 const (
 	defaultHerokuReporterInterval = 20 * time.Second
+
+	headerMeasurementsCount = "Measurements-Count"
+	headerMeasurementsTime  = "Measurements-Time"
 )
 
 type HerokuConfig struct {
@@ -79,8 +82,8 @@ func (r HerokuReporter) flush(ctx context.Context, set *am.MeasurementSet) {
 
 	now := time.Now().UTC()
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Measurements-Count", strconv.Itoa(l))
-	req.Header.Add("Measurements-Time", now.Format(time.RFC3339))
+	req.Header.Add(headerMeasurementsCount, strconv.Itoa(l))
+	req.Header.Add(headerMeasurementsTime, now.Format(time.RFC3339))
 
 	// send() will retry, but we should probably give up at some point...
 	ctx, cancel := context.WithTimeout(ctx, r.Config.Interval*2)
