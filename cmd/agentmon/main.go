@@ -85,7 +85,7 @@ func startReporter(ctx context.Context, i time.Duration, rURL string, inbox chan
 		},
 		Inbox: inbox,
 	}
-	go reporter.Report(ctx)
+	reporter.Report(ctx)
 }
 
 func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measurement) {
@@ -101,7 +101,7 @@ func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measure
 		},
 		Inbox: inbox,
 	}
-	go poller.Poll(ctx)
+	poller.Poll(ctx)
 }
 
 func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Measurement) {
@@ -111,5 +111,5 @@ func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Mea
 		},
 		Inbox: inbox,
 	}
-	go listener.ListenUDP(ctx)
+	listener.ListenUDP(ctx)
 }

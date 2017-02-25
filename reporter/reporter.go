@@ -10,7 +10,6 @@ import (
 	"time"
 
 	am "github.com/heroku/agentmon"
-	"github.com/heroku/agentmon/context/online"
 )
 
 const (
@@ -39,8 +38,6 @@ func (r HerokuReporter) Report(ctx context.Context) {
 }
 
 func (r HerokuReporter) reportLoop(ctx context.Context) {
-	online.Online(ctx)
-
 	measurements := am.NewMeasurementSet()
 	ticks := time.Tick(r.Config.Interval)
 	for {

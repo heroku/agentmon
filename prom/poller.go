@@ -11,7 +11,6 @@ import (
 	"time"
 
 	ag "github.com/heroku/agentmon"
-	"github.com/heroku/agentmon/context/online"
 	"github.com/matttproud/golang_protobuf_extensions/pbutil"
 	"github.com/prometheus/common/expfmt"
 
@@ -46,8 +45,6 @@ func (p PrometheusPoller) Poll(ctx context.Context) {
 }
 
 func (p PrometheusPoller) pollLoop(ctx context.Context) {
-	online.Online(ctx)
-
 	t := time.NewTicker(p.Config.Interval)
 
 	for {

@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/heroku/agentmon"
-	"github.com/heroku/agentmon/context/online"
 )
 
 const (
@@ -47,8 +46,6 @@ func (s StatsdListener) ListenUDP(ctx context.Context) {
 }
 
 func (s StatsdListener) parseLoop(ctx context.Context, conn io.ReadCloser) {
-	online.Online(ctx)
-
 	defer conn.Close()
 
 	if s.Config.MaxPacketSize == 0 {

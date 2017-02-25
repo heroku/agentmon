@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/heroku/agentmon"
-	"github.com/heroku/agentmon/context/online"
 )
 
 func makeTestHandler(t *testing.T, found chan string) http.Handler {
@@ -44,11 +43,8 @@ func TestMainStatsdEndToEnd(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(handler))
 	defer testServer.Close()
 
-	ctx = online.WithOnline(ctx, 2)
 	startReporter(ctx, 100*time.Millisecond, testServer.URL, inbox)
 	startStatsdListener(ctx, addr, inbox)
-
-	online.Wait(ctx)
 
 	conn, err := net.Dial("udp", addr)
 	if err != nil {
