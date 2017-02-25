@@ -1,80 +1,47 @@
 package reporter
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
-	"os"
 	"time"
-
-	am "github.com/heroku/agentmon"
 )
 
 const (
-	defaultHerokuReporterInterval = 20 * time.Second
+	maxRetries       = 3
+	initialPauseTime = 1 * time.Millisecond
 )
 
-type HerokuConfig struct {
-	URL      string
-	Interval time.Duration
-}
+// TODO(apg): Should probably be parameterizable
+//            allowing us to setup timeouts and such.
+func send(req *http.Request) error {
+	retries := 0
+	pause := initialPauseTime
 
-type HerokuReporter struct {
-	Config HerokuConfig
-	Inbox  chan *am.Measurement
-}
-
-func (r HerokuReporter) Report(ctx context.Context) {
-	if r.Config.URL == "" {
-		r.Config.URL = os.Getenv("HEROKU_METRICS_URL")
-	}
-	if r.Config.Interval <= 0 {
-		r.Config.Interval = defaultHerokuReporterInterval
-	}
-
-	go r.reportLoop(ctx)
-}
-
-func (r HerokuReporter) reportLoop(ctx context.Context) {
-	measurements := am.NewMeasurementSet()
-	ticks := time.Tick(r.Config.Interval)
+done:
 	for {
-		select {
-		case <-ctx.Done():
-			return
-		case m := <-r.Inbox:
-			measurements.Update(m)
-		case <-ticks:
-			out := measurements
-			measurements = am.NewMeasurementSet()
+		resp, err := http.DefaultClient.Do(req)
+		switch {
+		case err != nil:
+			return err
+		case resp.StatusCode >= 500:
+			return fmt.Errorf("upstream service replied with status=%d",
+				resp.StatusCode)
+		case resp.StatusCode >= 200 && resp.StatusCode < 300:
+			break done
+		default:
+			if retries == maxRetries {
+				return fmt.Errorf("no success after %d attempts", retries)
+			}
 
-			go r.flush(ctx, out)
+			pause = pause * 2
+			select {
+			case <-req.Context().Done():
+				return req.Context().Err()
+			case <-time.After(pause):
+				retries++
+				continue done
+			}
 		}
 	}
-}
-
-func (r HerokuReporter) flush(ctx context.Context, set *am.MeasurementSet) {
-	l := set.Len()
-	if l == 0 {
-		log.Printf("Nothing to flush in this interval.")
-	}
-
-	log.Printf("Flushing %d metrics in this interval.", set.Len())
-
-	var buffer bytes.Buffer
-	enc := json.NewEncoder(&buffer)
-	err := enc.Encode(set)
-	if err != nil {
-		// TODO: handle the error in some way here.
-		log.Printf("ERROR: HerokuReporter.flush: %s", err)
-		return
-	}
-
-	// Send to the reporter.
-	// TODO: ROBUSTIFY THIS!!!!!
-
-	log.Printf("SENDING TO: %s", r.Config.URL)
-	http.Post(r.Config.URL, "application/json", &buffer)
+	return nil
 }
