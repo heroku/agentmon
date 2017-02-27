@@ -1,0 +1,19 @@
+language: go
+go:
+  - 1.8.x
+
+script:
+  - make test
+
+before_deploy:
+  - make release
+  - export RELEASE_VERSION=$(git describe --tags --always)
+
+deploy:
+  skip_cleanup: true
+  provider: releases
+  files:
+    - agentmon-${RELEASE_VERSION}-linux-amd64.tar.gz
+  on:
+    tags: true
+    repo: heroku/agentmon
