@@ -1,19 +1,18 @@
 language: go
 go:
-  - 1.8.x
-
+- 1.8.x
 script:
-  - make test
-
+- make test
 before_deploy:
-  - make release
-  - export RELEASE_VERSION=$(git describe --tags --always)
-
+- make release
+- export RELEASE_VERSION=$(git describe --tags --always)
 deploy:
   skip_cleanup: true
   provider: releases
   files:
-    - agentmon-${RELEASE_VERSION}-linux-amd64.tar.gz
+  - agentmon-${RELEASE_VERSION}-linux-amd64.tar.gz
   on:
     tags: true
     repo: heroku/agentmon
+  api_key:
+    secure: ypGMTFkQpYKKWf01IOFEyub0iq7891KYhJSzP/dkASNRgzEc8q9jaB3rvfk/Zc8V6ms5qu4ULEeNqkgXDX1arzDrp7/1E6+jSW42FbNjE9FDy8ki2nCLR9v1ml9zZWeQg16Fme3e1ZdXDaG5v2+NC1xmvkJLMAkRGtQJHVXom9gAeMvDqejBLW8bZXcEjuPYsfor//YgxbJ4b773vloDnkfCrbZMGC8aky5xQH5hDmksoBaMXNX226JuJAEQwXysX3EPP3Cp/jslKEh6KnDBp1WHuOHa2EOwd4RK9CZXOU3Spcj8Heo/S06xIycnIUJbBw8ScVImXZZ2tCCi+1NWd8i/kF1NvlcjP7FPBFKXeAArmxtCmhd7oM1vXmB8zTXPO6J5cK33JebXDEpvYXdP76zWH7rVmYwmDZzTLuHwH7gzJj+uBBqBRUTGDezE7s9brX9DSdeogGH7yMCpvt4AAdzIIany7VDGeQ9rgxysLvyPoXzyZKHbLOPsyvAFqBj3Pyyi+3kpTma5k6nOQ3LCtoydBkvSe1xDws7pg9be6QbZAeL4tA8OY1HQ+S7g+hXTmJ3O6UHyu+H9KmpCC8bu1yox9FTSfQAsFFGOd1jiKoW0UaZIFXpia2N72RFYy4JO4OEPvvohk75dC3ypKNJWZesk/lorS7lICh26ThW4gM0=
