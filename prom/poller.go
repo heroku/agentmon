@@ -66,7 +66,11 @@ func (p PrometheusPoller) sync(ctx context.Context, ch <-chan *dto.MetricFamily)
 		select {
 		case <-ctx.Done():
 			return
-		case fam := <-ch:
+		case fam, ok := <-ch:
+			if !ok {
+				return
+			}
+
 			if ms, ok := familyToMeasurements(fam); ok {
 				for _, m := range ms {
 					// TODO: Probably don't want to block on this, drop instead.
@@ -93,7 +97,7 @@ func (p PrometheusPoller) fetchFamilies(ctx context.Context, ch chan<- *dto.Metr
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatalf("executing GET request for URL %q failed: %s", u, err)
+		log.Fatalf("http.do: failed: %s", err)
 	}
 	defer resp.Body.Close()
 
@@ -131,6 +135,8 @@ func (p PrometheusPoller) fetchFamilies(ctx context.Context, ch chan<- *dto.Metr
 			ch <- mf
 		}
 	}
+
+	close(ch)
 }
 
 func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool) {

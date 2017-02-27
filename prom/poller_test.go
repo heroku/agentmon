@@ -89,18 +89,20 @@ func TestPromPoller(t *testing.T) {
 func testPollerForType(t *testing.T, u *url.URL, exp map[string]float64, acceptHeader string) {
 	config := PrometheusConfig{
 		URL:          u,
-		Interval:     5 * time.Millisecond,
+		Interval:     50 * time.Millisecond,
 		AcceptHeader: acceptHeader,
 	}
+
+	found := make(map[string]int)
 
 	in := make(chan *am.Measurement, 4)
 	poller := PrometheusPoller{Config: config, Inbox: in}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	poller.Poll(ctx)
+	defer cancel()
 
-	// Basically, we want a single
-	timeout := time.After(9 * time.Millisecond)
+	timeout := time.After(90 * time.Millisecond)
 
 	for {
 		select {
@@ -108,13 +110,12 @@ func testPollerForType(t *testing.T, u *url.URL, exp map[string]float64, acceptH
 			if val, ok := exp[m.Name]; !ok {
 				t.Fatalf("Received measurement for unexpected metric %s", m.Name)
 			} else if val != m.Value {
-				t.Fatalf("Expected value=%f, got=%f", val, m.Value)
+				t.Fatalf("Expected want=%f, got=%f", val, m.Value)
 			}
-			delete(exp, m.Name)
+			found[m.Name]++
 		case <-timeout:
-			cancel()
-			if len(exp) > 0 {
-				t.Fatalf("Expectations left unsatisfied: %+v", exp)
+			if len(found) != len(exp) {
+				t.Fatalf("Expectations left unsatisfied: %+v", len(exp)-len(found))
 			}
 			return
 		}
@@ -205,19 +206,16 @@ loop:
 }
 
 func TestPollerSyncCancel(t *testing.T) {
-	mf, _ := fakeMetricFamily()
-
 	inbox := make(chan *am.Measurement, 2)
 	poller := PrometheusPoller{Inbox: inbox}
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan *dto.MetricFamily, 1)
 	cancel()
 	go poller.sync(ctx, ch)
-	ch <- mf
 
 	select {
 	case m := <-inbox:
-		t.Fatalf("Got something %+v, expected nothing", m)
-	case <-time.After(1 * time.Millisecond):
+		t.Fatalf("Got %+v, want nothing", m)
+	case <-time.After(10 * time.Millisecond):
 	}
 }
