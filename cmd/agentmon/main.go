@@ -91,17 +91,15 @@ func startReporter(ctx context.Context, i time.Duration, rURL string, inbox chan
 func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measurement) {
 	pu, err := url.Parse(u)
 	if err != nil {
-		log.Fatal("ERROR: Invalid Prometheus URL: %s", err)
+		log.Fatal("Invalid Prometheus URL: %s", err)
 	}
 
-	poller := prom.PrometheusPoller{
-		Config: prom.PrometheusConfig{
-			URL:      pu,
-			Interval: time.Duration(*promInterval) * time.Second,
-		},
-		Inbox: inbox,
+	poller := prom.Poller{
+		URL:      pu,
+		Interval: time.Duration(*promInterval) * time.Second,
+		Inbox:    inbox,
 	}
-	poller.Poll(ctx)
+	go poller.Poll(ctx)
 }
 
 func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Measurement) {
