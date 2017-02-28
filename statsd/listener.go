@@ -13,12 +13,6 @@ const (
 	defaultMaxPacketSizeUDP = 1472
 )
 
-type Config struct {
-	MaxPacketSize int64
-	Addr          string
-	PartialReads  bool
-}
-
 type Listener struct {
 	MaxPacketSize int64
 	Addr          string
