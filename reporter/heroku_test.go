@@ -13,8 +13,7 @@ import (
 
 func TestReporterLoopCancel(t *testing.T) {
 	inbox := make(chan *am.Measurement, 1)
-	config := HerokuConfig{Interval: time.Duration(1)}
-	reporter := HerokuReporter{config, inbox}
+	reporter := Heroku{Interval: time.Duration(1), Inbox: inbox}
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Redirect logging temporarily
@@ -25,7 +24,7 @@ func TestReporterLoopCancel(t *testing.T) {
 
 	// Cancel before loop starts
 	cancel()
-	go reporter.reportLoop(ctx)
+	go reporter.Report(ctx)
 
 	// Populate lines from log into a channel.
 	lines := make(chan string, 10)
