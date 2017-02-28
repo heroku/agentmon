@@ -73,8 +73,11 @@ func (p PrometheusPoller) sync(ctx context.Context, ch <-chan *dto.MetricFamily)
 
 			if ms, ok := familyToMeasurements(fam); ok {
 				for _, m := range ms {
-					// TODO: Probably don't want to block on this, drop instead.
-					p.Inbox <- m
+					select {
+					case p.Inbox <- m:
+					default:
+						log.Printf("sync: metric set send would block: dropping")
+					}
 				}
 			}
 		}
