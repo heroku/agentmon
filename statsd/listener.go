@@ -33,13 +33,13 @@ func (s StatsdListener) ListenUDP(ctx context.Context) {
 
 	resAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
-		log.Fatalf("ERROR: Could not resolve UDP address: %q", err)
+		log.Fatalf("listenUDP: resolve addr: %s", err)
 	}
 
 	log.Printf("Listening on %s...", resAddr)
 	listener, err := net.ListenUDP("udp", resAddr)
 	if err != nil {
-		log.Fatalf("ERROR: ListenUDP: %q", err)
+		log.Fatalf("listenUDP: %s", err)
 	}
 
 	go s.parseLoop(ctx, listener)

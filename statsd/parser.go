@@ -64,7 +64,7 @@ func (p *StatsdParser) Next() (*agentmon.Measurement, bool) {
 		buf = buf[:idx+n]
 		if err != nil {
 			if err != io.EOF {
-				log.Printf("ERROR: in StatsdParser.Next(): %s", err)
+				log.Printf("next: read: %s", err)
 			}
 
 			p.done = true

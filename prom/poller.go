@@ -88,7 +88,7 @@ func (p PrometheusPoller) fetchFamilies(ctx context.Context, ch chan<- *dto.Metr
 	u := p.Config.URL.String()
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		log.Fatalf("creating GET request for URL %q failed: %s", u, err)
+		log.Fatalf("fetchFamilies: http.newrequest: failed: %s", u, err)
 	}
 
 	req = req.WithContext(ctx)
@@ -100,12 +100,12 @@ func (p PrometheusPoller) fetchFamilies(ctx context.Context, ch chan<- *dto.Metr
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatalf("http.do: failed: %s", err)
+		log.Fatalf("fetchFamilies: http.do: failed: %s", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("GET request for URL %q returned HTTP status %s", u, resp.Status)
+		log.Fatalf("fetchFamilies: bad status: %s", u, resp.Status)
 	}
 
 	mtype, params, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
@@ -119,7 +119,7 @@ func (p PrometheusPoller) fetchFamilies(ctx context.Context, ch chan<- *dto.Metr
 				if err == io.EOF {
 					break
 				}
-				log.Fatalln("reading metric family protocol buffer failed:", err)
+				log.Fatalln("fetchFamilies: read-pb: failed: %s", err)
 			}
 			ch <- mf
 		}
@@ -132,7 +132,7 @@ func (p PrometheusPoller) fetchFamilies(ctx context.Context, ch chan<- *dto.Metr
 		metricFamilies, err := parser.TextToMetricFamilies(resp.Body)
 
 		if err != nil {
-			log.Fatalln("reading text format failed:", err)
+			log.Fatalln("fetchFamilies: read-text: failed: %s", err)
 		}
 		for _, mf := range metricFamilies {
 			ch <- mf
