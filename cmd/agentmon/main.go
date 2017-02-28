@@ -54,7 +54,14 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	if *promURL == "" && *statsdAddr == "" {
-		log.Fatal("ERROR: Nothing to start. Exiting.\n")
+		log.Fatal("ERROR: Nothing to start. Exiting.")
+	}
+	rURL := flag.Arg(0)
+	if rURL == "" {
+		rURL = os.Getenv("HEROKU_METRICS_URL")
+		if rURL == "" {
+			log.Fatal("ERROR: Don't know where to report metrics. Exiting.")
+		}
 	}
 
 	inbox := make(chan *agentmon.Measurement, *bufferSize)
@@ -65,7 +72,8 @@ func main() {
 	if *statsdAddr != "" {
 		startStatsdListener(ctx, *statsdAddr, inbox)
 	}
-	startReporter(ctx, time.Duration(*flushInterval)*time.Second, flag.Arg(0), inbox)
+
+	startReporter(ctx, time.Duration(*flushInterval)*time.Second, rURL, inbox)
 	handleSignals(sigs, cancel)
 }
 
@@ -78,20 +86,18 @@ func handleSignals(sigs chan os.Signal, cancel func()) {
 }
 
 func startReporter(ctx context.Context, i time.Duration, rURL string, inbox chan *agentmon.Measurement) {
-	reporter := reporter.HerokuReporter{
-		Config: reporter.HerokuConfig{
-			URL:      rURL,
-			Interval: i,
-		},
-		Inbox: inbox,
+	reporter := reporter.Heroku{
+		URL:      rURL,
+		Interval: i,
+		Inbox:    inbox,
 	}
-	reporter.Report(ctx)
+	go reporter.Report(ctx)
 }
 
 func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measurement) {
 	pu, err := url.Parse(u)
 	if err != nil {
-		log.Fatal("ERROR: Invalid Prometheus URL: %s", err)
+		log.Fatalf("ERROR: Invalid Prometheus URL: %s", err)
 	}
 
 	poller := prom.PrometheusPoller{

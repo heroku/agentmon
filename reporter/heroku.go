@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -20,30 +19,21 @@ const (
 	headerMeasurementsTime  = "Measurements-Time"
 )
 
-type HerokuConfig struct {
+// Heroku reporter
+type Heroku struct {
 	URL      string
 	Interval time.Duration
+	Inbox    chan *am.Measurement
 }
 
-type HerokuReporter struct {
-	Config HerokuConfig
-	Inbox  chan *am.Measurement
-}
-
-func (r HerokuReporter) Report(ctx context.Context) {
-	if r.Config.URL == "" {
-		r.Config.URL = os.Getenv("HEROKU_METRICS_URL")
-	}
-	if r.Config.Interval <= 0 {
-		r.Config.Interval = defaultHerokuReporterInterval
+// Report measurments to Heroku
+func (r Heroku) Report(ctx context.Context) {
+	if r.Interval <= 0 {
+		r.Interval = defaultHerokuReporterInterval
 	}
 
-	go r.reportLoop(ctx)
-}
-
-func (r HerokuReporter) reportLoop(ctx context.Context) {
 	measurements := am.NewMeasurementSet()
-	ticks := time.Tick(r.Config.Interval)
+	ticks := time.Tick(r.Interval)
 
 	for {
 		select {
@@ -60,7 +50,7 @@ func (r HerokuReporter) reportLoop(ctx context.Context) {
 	}
 }
 
-func (r HerokuReporter) flush(ctx context.Context, set *am.MeasurementSet) {
+func (r Heroku) flush(ctx context.Context, set *am.MeasurementSet) {
 	l := set.Len()
 	if l == 0 {
 		return
@@ -74,7 +64,7 @@ func (r HerokuReporter) flush(ctx context.Context, set *am.MeasurementSet) {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPost, r.Config.URL, &buffer)
+	req, err := http.NewRequest(http.MethodPost, r.URL, &buffer)
 	if err != nil {
 		log.Printf("flush: %s", err)
 		return
@@ -86,7 +76,7 @@ func (r HerokuReporter) flush(ctx context.Context, set *am.MeasurementSet) {
 	req.Header.Add(headerMeasurementsTime, now.Format(time.RFC3339))
 
 	// send() will retry, but we should probably give up at some point...
-	ctx, cancel := context.WithTimeout(ctx, r.Config.Interval*2)
+	ctx, cancel := context.WithTimeout(ctx, r.Interval*2)
 	defer cancel()
 
 	req = req.WithContext(ctx)
