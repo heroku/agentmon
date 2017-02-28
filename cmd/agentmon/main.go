@@ -111,10 +111,8 @@ func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measure
 }
 
 func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Measurement) {
-	listener := statsd.StatsdListener{
-		Config: statsd.StatsdConfig{
-			Addr: a,
-		},
+	listener := statsd.Listener{
+		Addr:  a,
 		Inbox: inbox,
 	}
 	listener.ListenUDP(ctx)

@@ -50,8 +50,7 @@ gaugor:333|g
 	}
 
 	inbox := make(chan *am.Measurement, 3)
-	config := StatsdConfig{MaxPacketSize: 100, PartialReads: true}
-	listener := StatsdListener{config, inbox}
+	listener := Listener{MaxPacketSize: 100, PartialReads: true, Inbox: inbox}
 
 	go listener.parseLoop(context.Background(), input)
 
@@ -85,8 +84,7 @@ gaugor:333|g
 `))
 	input := &ClosableBuffer{buf, false}
 	inbox := make(chan *am.Measurement, 1)
-	config := StatsdConfig{MaxPacketSize: 100, PartialReads: true}
-	listener := StatsdListener{config, inbox}
+	listener := Listener{MaxPacketSize: 100, PartialReads: true, Inbox: inbox}
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Cancel before loop starts

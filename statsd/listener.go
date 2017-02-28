@@ -14,19 +14,21 @@ const (
 	defaultMaxPacketSizeUDP = 1472
 )
 
-type StatsdConfig struct {
+type Config struct {
 	MaxPacketSize int64
 	Addr          string
 	PartialReads  bool
 }
 
-type StatsdListener struct {
-	Config StatsdConfig
-	Inbox  chan *agentmon.Measurement
+type Listener struct {
+	MaxPacketSize int64
+	Addr          string
+	PartialReads  bool
+	Inbox         chan *agentmon.Measurement
 }
 
-func (s StatsdListener) ListenUDP(ctx context.Context) {
-	addr := s.Config.Addr
+func (s Listener) ListenUDP(ctx context.Context) {
+	addr := s.Addr
 	if addr == "" {
 		addr = ":" + os.Getenv("PORT")
 	}
@@ -45,14 +47,14 @@ func (s StatsdListener) ListenUDP(ctx context.Context) {
 	go s.parseLoop(ctx, listener)
 }
 
-func (s StatsdListener) parseLoop(ctx context.Context, conn io.ReadCloser) {
+func (s Listener) parseLoop(ctx context.Context, conn io.ReadCloser) {
 	defer conn.Close()
 
-	if s.Config.MaxPacketSize == 0 {
-		s.Config.MaxPacketSize = defaultMaxPacketSizeUDP
+	if s.MaxPacketSize == 0 {
+		s.MaxPacketSize = defaultMaxPacketSizeUDP
 	}
 
-	parser := NewStatsdParser(conn, s.Config.PartialReads, int(s.Config.MaxPacketSize))
+	parser := NewParser(conn, s.PartialReads, int(s.MaxPacketSize))
 
 	for {
 		select {
