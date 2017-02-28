@@ -53,14 +53,20 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	if *promURL == "" && *statsdAddr == "" {
-		log.Fatal("ERROR: Nothing to start. Exiting.")
+	// For statsd, default to :$PORT, if not specified.
+	if port := os.Getenv("PORT"); *statsdAddr == "" && port != "" {
+		*statsdAddr = ":" + port
 	}
+
+	if *promURL == "" && *statsdAddr == "" {
+		log.Fatal("Nothing to start. Exiting.")
+	}
+
 	rURL := flag.Arg(0)
 	if rURL == "" {
 		rURL = os.Getenv("HEROKU_METRICS_URL")
 		if rURL == "" {
-			log.Fatal("ERROR: Don't know where to report metrics. Exiting.")
+			log.Fatal("Don't know where to report metrics. Exiting.")
 		}
 	}
 

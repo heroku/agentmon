@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 
 	"github.com/heroku/agentmon"
 )
@@ -28,12 +27,7 @@ type Listener struct {
 }
 
 func (s Listener) ListenUDP(ctx context.Context) {
-	addr := s.Addr
-	if addr == "" {
-		addr = ":" + os.Getenv("PORT")
-	}
-
-	resAddr, err := net.ResolveUDPAddr("udp", addr)
+	resAddr, err := net.ResolveUDPAddr("udp", s.Addr)
 	if err != nil {
 		log.Fatalf("listenUDP: resolve addr: %s", err)
 	}
