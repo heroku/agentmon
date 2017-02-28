@@ -8,7 +8,7 @@ build:
 install:
 	go install -a -ldflags "-X ${LINKER_VERSION_SYMBOL} ${LINKER_VERSION}" ./...
 
-release:
+release: gox
 	{\
 		TMP=$$(mktemp -d -t agentmon.XXXXX); \
 		for arch in $(ARCHES); do \
