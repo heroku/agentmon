@@ -121,5 +121,5 @@ func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Mea
 		Addr:  a,
 		Inbox: inbox,
 	}
-	listener.ListenUDP(ctx)
+	go listener.ListenUDP(ctx)
 }

@@ -38,7 +38,7 @@ func (s Listener) ListenUDP(ctx context.Context) {
 		log.Fatalf("listenUDP: %s", err)
 	}
 
-	go s.parseLoop(ctx, listener)
+	s.parseLoop(ctx, listener)
 }
 
 func (s Listener) parseLoop(ctx context.Context, conn io.ReadCloser) {
