@@ -49,6 +49,9 @@ func TestMainStatsdEndToEnd(t *testing.T) {
 	startReporter(ctx, 100*time.Millisecond, testServer.URL, inbox)
 	startStatsdListener(ctx, addr, inbox)
 
+	// Wait for Listener to come online.
+	time.Sleep(100 * time.Millisecond)
+
 	conn, err := net.Dial("udp", addr)
 	if err != nil {
 		t.Fatalf("dial: %s", err)
