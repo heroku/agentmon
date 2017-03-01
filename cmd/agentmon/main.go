@@ -53,14 +53,20 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	if *promURL == "" && *statsdAddr == "" {
-		log.Fatal("ERROR: Nothing to start. Exiting.")
+	// For statsd, default to :$PORT, if not specified.
+	if port := os.Getenv("PORT"); *statsdAddr == "" && port != "" {
+		*statsdAddr = ":" + port
 	}
+
+	if *promURL == "" && *statsdAddr == "" {
+		log.Fatal("Nothing to start. Exiting.")
+	}
+
 	rURL := flag.Arg(0)
 	if rURL == "" {
 		rURL = os.Getenv("HEROKU_METRICS_URL")
 		if rURL == "" {
-			log.Fatal("ERROR: Don't know where to report metrics. Exiting.")
+			log.Fatal("Don't know where to report metrics. Exiting.")
 		}
 	}
 
@@ -111,11 +117,9 @@ func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measure
 }
 
 func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Measurement) {
-	listener := statsd.StatsdListener{
-		Config: statsd.StatsdConfig{
-			Addr: a,
-		},
+	listener := statsd.Listener{
+		Addr:  a,
 		Inbox: inbox,
 	}
-	listener.ListenUDP(ctx)
+	go listener.ListenUDP(ctx)
 }
