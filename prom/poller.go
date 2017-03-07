@@ -26,26 +26,19 @@ const (
 	promProto           = "io.prometheus.client.MetricFamily"
 )
 
-type PrometheusConfig struct {
+type Poller struct {
 	URL          *url.URL
 	Interval     time.Duration
 	AcceptHeader string
+	Inbox        chan *ag.Measurement
 }
 
-type PrometheusPoller struct {
-	Config PrometheusConfig
-	Inbox  chan *ag.Measurement
-}
-
-func (p PrometheusPoller) Poll(ctx context.Context) {
-	if p.Config.Interval == 0 {
-		p.Config.Interval = defaultPollInterval
+func (p Poller) Poll(ctx context.Context) {
+	if p.Interval == 0 {
+		p.Interval = defaultPollInterval
 	}
-	go p.pollLoop(ctx)
-}
 
-func (p PrometheusPoller) pollLoop(ctx context.Context) {
-	t := time.NewTicker(p.Config.Interval)
+	t := time.NewTicker(p.Interval)
 
 	for {
 		select {
@@ -53,7 +46,7 @@ func (p PrometheusPoller) pollLoop(ctx context.Context) {
 			return
 		case <-t.C:
 			ch := make(chan *dto.MetricFamily, 1024)
-			tctx, cancel := context.WithTimeout(ctx, p.Config.Interval)
+			tctx, cancel := context.WithTimeout(ctx, p.Interval)
 			go p.fetchFamilies(tctx, ch)
 			p.sync(tctx, ch)
 			cancel()
@@ -61,7 +54,7 @@ func (p PrometheusPoller) pollLoop(ctx context.Context) {
 	}
 }
 
-func (p PrometheusPoller) sync(ctx context.Context, ch <-chan *dto.MetricFamily) {
+func (p Poller) sync(ctx context.Context, ch <-chan *dto.MetricFamily) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -84,18 +77,18 @@ func (p PrometheusPoller) sync(ctx context.Context, ch <-chan *dto.MetricFamily)
 	}
 }
 
-func (p PrometheusPoller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) {
-	u := p.Config.URL.String()
+func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) {
+	u := p.URL.String()
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		log.Fatalf("fetchFamilies: http.newrequest: failed: %s", u, err)
 	}
 
 	req = req.WithContext(ctx)
-	if p.Config.AcceptHeader == "" {
+	if p.AcceptHeader == "" {
 		req.Header.Add("Accept", defaultAcceptHeader)
 	} else {
-		req.Header.Add("Accept", p.Config.AcceptHeader)
+		req.Header.Add("Accept", p.AcceptHeader)
 	}
 
 	resp, err := http.DefaultClient.Do(req)

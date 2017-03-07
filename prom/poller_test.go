@@ -87,19 +87,18 @@ func TestPromPoller(t *testing.T) {
 }
 
 func testPollerForType(t *testing.T, u *url.URL, exp map[string]float64, acceptHeader string) {
-	config := PrometheusConfig{
-		URL:          u,
-		Interval:     50 * time.Millisecond,
-		AcceptHeader: acceptHeader,
-	}
-
 	found := make(map[string]int)
 
 	in := make(chan *am.Measurement, 4)
-	poller := PrometheusPoller{Config: config, Inbox: in}
+	poller := Poller{
+		URL:          u,
+		Interval:     50 * time.Millisecond,
+		AcceptHeader: acceptHeader,
+		Inbox:        in,
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	poller.Poll(ctx)
+	go poller.Poll(ctx)
 	defer cancel()
 
 	timeout := time.After(90 * time.Millisecond)
@@ -170,7 +169,7 @@ func TestPollerSync(t *testing.T) {
 	mf, expected := fakeMetricFamily()
 
 	inbox := make(chan *am.Measurement, 2)
-	poller := PrometheusPoller{Inbox: inbox}
+	poller := Poller{Inbox: inbox}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan *dto.MetricFamily, 1)
@@ -207,7 +206,7 @@ loop:
 
 func TestPollerSyncCancel(t *testing.T) {
 	inbox := make(chan *am.Measurement, 2)
-	poller := PrometheusPoller{Inbox: inbox}
+	poller := Poller{Inbox: inbox}
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan *dto.MetricFamily, 1)
 	cancel()
