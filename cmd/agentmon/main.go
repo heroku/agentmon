@@ -20,6 +20,7 @@ import (
 
 var (
 	showVersion   = flag.Bool("version", false, "print version string")
+	debug         = flag.Bool("debug", false, "debug mode is more verbose")
 	flushInterval = flag.Int("interval", 20, "Sink flush interval in seconds")
 	promURL       = flag.String("prom-url", "", "Prometheus URL")
 	promInterval  = flag.Int("prom-interval", 5, "Prometheus poll interval in seconds")
@@ -73,13 +74,13 @@ func main() {
 	inbox := make(chan *agentmon.Measurement, *bufferSize)
 
 	if *promURL != "" {
-		startPromPoller(ctx, *promURL, inbox)
+		startPromPoller(ctx, *promURL, inbox, *debug)
 	}
 	if *statsdAddr != "" {
-		startStatsdListener(ctx, *statsdAddr, inbox)
+		startStatsdListener(ctx, *statsdAddr, inbox, *debug)
 	}
 
-	startReporter(ctx, time.Duration(*flushInterval)*time.Second, rURL, inbox)
+	startReporter(ctx, time.Duration(*flushInterval)*time.Second, rURL, inbox, *debug)
 	handleSignals(sigs, cancel)
 }
 
@@ -91,16 +92,17 @@ func handleSignals(sigs chan os.Signal, cancel func()) {
 	}
 }
 
-func startReporter(ctx context.Context, i time.Duration, rURL string, inbox chan *agentmon.Measurement) {
+func startReporter(ctx context.Context, i time.Duration, rURL string, inbox chan *agentmon.Measurement, debug bool) {
 	reporter := reporter.Heroku{
 		URL:      rURL,
 		Interval: i,
 		Inbox:    inbox,
+		Debug:    debug,
 	}
 	go reporter.Report(ctx)
 }
 
-func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measurement) {
+func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measurement, debug bool) {
 	pu, err := url.Parse(u)
 	if err != nil {
 		log.Fatal("Invalid Prometheus URL: %s", err)
@@ -110,14 +112,16 @@ func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measure
 		URL:      pu,
 		Interval: time.Duration(*promInterval) * time.Second,
 		Inbox:    inbox,
+		Debug:    debug,
 	}
 	go poller.Poll(ctx)
 }
 
-func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Measurement) {
+func startStatsdListener(ctx context.Context, a string, inbox chan *agentmon.Measurement, debug bool) {
 	listener := statsd.Listener{
 		Addr:  a,
 		Inbox: inbox,
+		Debug: debug,
 	}
 	go listener.ListenUDP(ctx)
 }
