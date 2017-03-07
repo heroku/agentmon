@@ -8,7 +8,7 @@ import (
 	am "github.com/heroku/agentmon"
 )
 
-func testStatsdParser(t *testing.T, parser *StatsdParser, expected []*am.Measurement) {
+func testParser(t *testing.T, parser *Parser, expected []*am.Measurement) {
 	for _, exp := range expected {
 		act, more := parser.Next()
 		if act == nil && more {
@@ -33,7 +33,7 @@ func testStatsdParser(t *testing.T, parser *StatsdParser, expected []*am.Measure
 	}
 }
 
-func TestStatsdParserWithoutPartialReads(t *testing.T) {
+func TestParserWithoutPartialReads(t *testing.T) {
 	input := bytes.NewBuffer([]byte(`gorets:1|c
 gorets:1|c|@0.1
 gaugor:333|g
@@ -57,12 +57,12 @@ gaugor:333|g
 		},
 	}
 
-	parser := NewStatsdParser(input, false, 100)
+	parser := NewParser(input, false, 100)
 
-	testStatsdParser(t, parser, expected)
+	testParser(t, parser, expected)
 }
 
-func TestStatsdParserWithPartialReads(t *testing.T) {
+func TestParserWithPartialReads(t *testing.T) {
 	input := bytes.NewBuffer([]byte(`gorets:1|c
 gorets:1|c|@0.1
 gaugor:333|g
@@ -86,12 +86,12 @@ gaugor:333|g
 		},
 	}
 
-	parser := NewStatsdParser(input, true, 20)
+	parser := NewParser(input, true, 20)
 
-	testStatsdParser(t, parser, expected)
+	testParser(t, parser, expected)
 }
 
-func TestStatsdParse(t *testing.T) {
+func TestParse(t *testing.T) {
 	testCases := map[string]map[string]*am.Measurement{
 		"Counters": map[string]*am.Measurement{
 			"gorets:1|c": &am.Measurement{
@@ -146,7 +146,7 @@ func TestStatsdParse(t *testing.T) {
 	for name, tests := range testCases {
 		t.Run(fmt.Sprintf("Parse for %s", name), func(t *testing.T) {
 			for input, exp := range tests {
-				parser := &StatsdParser{}
+				parser := &Parser{}
 				out, err := parser.parseLine([]byte(input))
 				if err != nil {
 					t.Errorf("Got unexpected error for %q: %s", input, err)
@@ -173,7 +173,7 @@ func TestStatsdParse(t *testing.T) {
 	}
 }
 
-func TestStatsdParseValue(t *testing.T) {
+func TestParseValue(t *testing.T) {
 	for _, tc := range []struct {
 		input    string
 		expected string
@@ -216,7 +216,7 @@ func TestStatsdParseValue(t *testing.T) {
 	}
 }
 
-func TestStatsdParseName(t *testing.T) {
+func TestParseName(t *testing.T) {
 	for _, tc := range []struct {
 		input    string
 		expected string
@@ -253,7 +253,7 @@ func TestStatsdParseName(t *testing.T) {
 	}
 }
 
-func TestStatsdMetricType(t *testing.T) {
+func TestMetricType(t *testing.T) {
 	for _, tc := range []struct {
 		input    string
 		expected string
@@ -287,7 +287,7 @@ func TestStatsdMetricType(t *testing.T) {
 	}
 }
 
-func TestStatsdSample(t *testing.T) {
+func TestSample(t *testing.T) {
 	for _, tc := range []struct {
 		input    string
 		expected string
@@ -318,8 +318,8 @@ func TestStatsdSample(t *testing.T) {
 	}
 }
 
-func BenchmarkStatsdParse(b *testing.B) {
-	parser := &StatsdParser{}
+func BenchmarkParse(b *testing.B) {
+	parser := &Parser{}
 
 	lines := []string{
 		"gorets:1|c",

@@ -14,7 +14,7 @@ import (
 
 var Debug = true
 
-type StatsdParser struct {
+type Parser struct {
 	reader       io.Reader
 	buffer       []byte
 	partialReads bool
@@ -22,8 +22,8 @@ type StatsdParser struct {
 	done         bool
 }
 
-func NewStatsdParser(r io.Reader, partialReads bool, maxReadSize int) *StatsdParser {
-	return &StatsdParser{
+func NewParser(r io.Reader, partialReads bool, maxReadSize int) *Parser {
+	return &Parser{
 		reader:       r,
 		buffer:       []byte{},
 		partialReads: partialReads,
@@ -31,7 +31,7 @@ func NewStatsdParser(r io.Reader, partialReads bool, maxReadSize int) *StatsdPar
 	}
 }
 
-func (p *StatsdParser) Next() (*agentmon.Measurement, bool) {
+func (p *Parser) Next() (*agentmon.Measurement, bool) {
 	buf := p.buffer
 
 	for {
@@ -86,7 +86,7 @@ func (p *StatsdParser) Next() (*agentmon.Measurement, bool) {
 	}
 }
 
-func (p *StatsdParser) lineFrom(input []byte) ([]byte, []byte) {
+func (p *Parser) lineFrom(input []byte) ([]byte, []byte) {
 	split := bytes.SplitAfterN(input, []byte("\n"), 2)
 	if len(split) == 2 {
 		return split[0][:len(split[0])-1], split[1]
@@ -106,7 +106,7 @@ func (p *StatsdParser) lineFrom(input []byte) ([]byte, []byte) {
 	return nil, input
 }
 
-func (p *StatsdParser) parseLine(line []byte) (*agentmon.Measurement, error) {
+func (p *Parser) parseLine(line []byte) (*agentmon.Measurement, error) {
 	// metric name is [a-zA-Z0-9._-]+
 	name, rest, err := readMetricName(line)
 	if err != nil {
