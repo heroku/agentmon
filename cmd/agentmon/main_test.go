@@ -46,8 +46,8 @@ func TestMainStatsdEndToEnd(t *testing.T) {
 	testServer := httptest.NewServer(handler)
 	defer testServer.Close()
 
-	startReporter(ctx, 100*time.Millisecond, testServer.URL, inbox)
-	startStatsdListener(ctx, addr, inbox)
+	startReporter(ctx, 100*time.Millisecond, testServer.URL, inbox, false)
+	startStatsdListener(ctx, addr, inbox, false)
 
 	// Wait for Listener to come online.
 	time.Sleep(100 * time.Millisecond)

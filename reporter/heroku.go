@@ -24,6 +24,7 @@ type Heroku struct {
 	URL      string
 	Interval time.Duration
 	Inbox    chan *am.Measurement
+	Debug    bool
 }
 
 // Report measurments to Heroku
@@ -38,6 +39,9 @@ func (r Heroku) Report(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
+			if r.Debug {
+				log.Println("debug: stopping HerokuReporter loop")
+			}
 			return
 		case m := <-r.Inbox:
 			measurements.Update(m)
@@ -84,5 +88,9 @@ func (r Heroku) flush(ctx context.Context, set *am.MeasurementSet) {
 	err = send(req)
 	if err != nil {
 		log.Printf("flush: send: %s", err)
+	}
+
+	if r.Debug {
+		log.Printf("debug: flushed %d measurements to Heroku", l)
 	}
 }

@@ -18,6 +18,7 @@ type Listener struct {
 	Addr          string
 	PartialReads  bool
 	Inbox         chan *agentmon.Measurement
+	Debug         bool
 }
 
 func (s Listener) ListenUDP(ctx context.Context) {
@@ -40,6 +41,10 @@ func (s Listener) parseLoop(ctx context.Context, conn io.ReadCloser) {
 
 	if s.MaxPacketSize == 0 {
 		s.MaxPacketSize = defaultMaxPacketSizeUDP
+	}
+
+	if s.Debug {
+		log.Println("debug: handling incoming statsd packet")
 	}
 
 	parser := NewParser(conn, s.PartialReads, int(s.MaxPacketSize))

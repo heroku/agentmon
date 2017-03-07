@@ -31,6 +31,7 @@ type Poller struct {
 	Interval     time.Duration
 	AcceptHeader string
 	Inbox        chan *ag.Measurement
+	Debug        bool
 }
 
 func (p Poller) Poll(ctx context.Context) {
@@ -43,6 +44,9 @@ func (p Poller) Poll(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
+			if p.Debug {
+				log.Println("debug: stopping Prometheus Pooler loop")
+			}
 			return
 		case <-t.C:
 			ch := make(chan *dto.MetricFamily, 1024)
@@ -91,6 +95,10 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 		req.Header.Add("Accept", p.AcceptHeader)
 	}
 
+	if p.Debug {
+		log.Printf("debug: fetching families via Prometheus from %s\n", u)
+	}
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatalf("fetchFamilies: http.do: failed: %s", err)
@@ -100,6 +108,8 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 	if resp.StatusCode != http.StatusOK {
 		log.Fatalf("fetchFamilies: bad status: %s", u, resp.Status)
 	}
+
+	familyCount := 0
 
 	mtype, params, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 	if err == nil && mtype == promMediaType &&
@@ -115,6 +125,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 				log.Fatalln("fetchFamilies: read-pb: failed: %s", err)
 			}
 			ch <- mf
+			familyCount++
 		}
 	} else {
 		// We could do further content-type checks here, but the
@@ -129,9 +140,13 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 		}
 		for _, mf := range metricFamilies {
 			ch <- mf
+			familyCount++
 		}
 	}
 
+	if p.Debug {
+		log.Printf("debug: fetched %d families via %s response from Prometheus\n", familyCount, mtype)
+	}
 	close(ch)
 }
 
