@@ -203,11 +203,28 @@ func suffixFor(m *dto.Metric) string {
 	result := make([]string, 0, len(m.Label))
 
 	for _, lp := range m.Label {
-		result = append(result, lp.GetName()+"_"+lp.GetValue())
+		labelName := strings.Map(charMapper, lp.GetName())
+		labelVal := strings.Map(charMapper, lp.GetValue())
+		result = append(result, labelName+"_"+labelVal)
 	}
 
 	if len(result) == 0 {
 		return ""
 	}
 	return "." + strings.Join(result, ".")
+}
+
+func charMapper(r rune) rune {
+	switch {
+	case r >= 'A' && r <= 'Z':
+		return r
+	case r >= 'a' && r <= 'z':
+		return r
+	case r >= '0' && r <= '9':
+		return r
+	case r == '-' || r == '_' || r == '.':
+		return r
+	default:
+		return '_'
+	}
 }

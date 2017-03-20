@@ -41,13 +41,15 @@ func setup() (*url.URL, map[string]float64, func()) {
 	)
 	gaugeVec.WithLabelValues("office").Add(75)
 	gaugeVec.WithLabelValues("kitchen").Add(76)
+	gaugeVec.WithLabelValues("pantry #1").Add(71)
 	reg.MustRegister(gaugeVec)
 
 	expectations := map[string]float64{
-		"some_counter.code_200.type_http":              1,
-		"some_counter.code_500.type_http":              1,
-		"some_gauge.location_office.type_temperature":  75,
-		"some_gauge.location_kitchen.type_temperature": 76,
+		"some_counter.code_200.type_http":                1,
+		"some_counter.code_500.type_http":                1,
+		"some_gauge.location_office.type_temperature":    75,
+		"some_gauge.location_kitchen.type_temperature":   76,
+		"some_gauge.location_pantry__1.type_temperature": 71,
 	}
 
 	buf := &bytes.Buffer{}
