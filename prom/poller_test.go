@@ -123,7 +123,7 @@ func testPollerForType(t *testing.T, u *url.URL, exp map[string]float64, acceptH
 	}
 }
 
-func fakeSummaryFamily() (*dto.MetricFamily, map[string]*am.Measurement) {
+func fakeSummaryFamily() (*dto.MetricFamily, []*am.Measurement) {
 	name := "some_summary"
 	path := "path"
 	index := "index"
@@ -142,14 +142,14 @@ func fakeSummaryFamily() (*dto.MetricFamily, map[string]*am.Measurement) {
 					Summary: &dto.Summary{SampleCount: &cnt, SampleSum: &sum},
 				},
 			},
-		}, map[string]*am.Measurement{
-			"some_summary_sum.path_index": {
-				Name:  "some_summary_sum.path_index",
+		}, []*am.Measurement{
+			{
+				Name:  "some_summary.path_index",
 				Value: 20,
 				Type:  "g",
 			},
-			"some_summary_count.path_index": {
-				Name:  "some_summary_count.path_index",
+			{
+				Name:  "some_summary.path_index",
 				Value: 2,
 				Type:  "c",
 			},
@@ -172,13 +172,8 @@ func TestSummaryNaming(t *testing.T) {
 		t.Fatalf("got len(%d), want len(2)", len(out))
 	}
 
-	for _, got := range out {
-		want, ok := exps[got.Name]
-
-		if !ok {
-			t.Fatalf("Unexpected name: %s", got.Name)
-		}
-
+	for i, got := range out {
+		want := exps[i]
 		if want.Name != got.Name {
 			t.Errorf("want(name) = %v, got(name) = %v", want.Name, got.Name)
 		}
@@ -188,12 +183,6 @@ func TestSummaryNaming(t *testing.T) {
 		if want.Type != got.Type {
 			t.Errorf("want(type) = %v, got(type) = %v", want.Type, got.Type)
 		}
-
-		delete(exps, got.Name)
-	}
-
-	if len(exps) > 0 {
-		t.Fatal("%d unsatisfied expectations: %v", len(exps), exps)
 	}
 }
 
