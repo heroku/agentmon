@@ -175,6 +175,23 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 			})
 			ok = true
 		}
+	case dto.MetricType_SUMMARY:
+		for _, m := range mf.Metric {
+			summary := m.GetSummary()
+			out = append(out, &ag.Measurement{
+				Name:      name + "_sum" + suffixFor(m),
+				Timestamp: msToTime(m.GetTimestampMs()),
+				Type:      "g",
+				Value:     summary.GetSampleSum(),
+			})
+			out = append(out, &ag.Measurement{
+				Name:      name + "_count" + suffixFor(m),
+				Timestamp: msToTime(m.GetTimestampMs()),
+				Type:      "c",
+				Value:     float64(summary.GetSampleCount()),
+			})
+			ok = true
+		}
 	}
 	return
 }
