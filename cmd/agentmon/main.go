@@ -31,6 +31,9 @@ var (
 const measurementBufferSize = 1000
 
 func main() {
+	log.SetPrefix("agentmon: ")
+	log.SetFlags(0)
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [flags] sink-URL", os.Args[0])
 	}
