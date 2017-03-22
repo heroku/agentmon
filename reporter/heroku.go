@@ -64,7 +64,7 @@ func (r Heroku) flush(ctx context.Context, set *am.MeasurementSet) {
 	enc := json.NewEncoder(&buffer)
 	err := enc.Encode(set)
 	if err != nil {
-		log.Printf("flush: encode: %s", err)
+		log.Printf("flush: encode: %s: %#v", err, set)
 		return
 	}
 
