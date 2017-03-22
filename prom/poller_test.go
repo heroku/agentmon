@@ -41,13 +41,15 @@ func setup() (*url.URL, map[string]float64, func()) {
 	)
 	gaugeVec.WithLabelValues("office").Add(75)
 	gaugeVec.WithLabelValues("kitchen").Add(76)
+	gaugeVec.WithLabelValues("pantry #1").Add(71)
 	reg.MustRegister(gaugeVec)
 
 	expectations := map[string]float64{
-		"some_counter.code_200.type_http":              1,
-		"some_counter.code_500.type_http":              1,
-		"some_gauge.location_office.type_temperature":  75,
-		"some_gauge.location_kitchen.type_temperature": 76,
+		"some_counter.code_200.type_http":                1,
+		"some_counter.code_500.type_http":                1,
+		"some_gauge.location_office.type_temperature":    75,
+		"some_gauge.location_kitchen.type_temperature":   76,
+		"some_gauge.location_pantry__1.type_temperature": 71,
 	}
 
 	buf := &bytes.Buffer{}
@@ -121,7 +123,70 @@ func testPollerForType(t *testing.T, u *url.URL, exp map[string]float64, acceptH
 	}
 }
 
-func fakeMetricFamily() (*dto.MetricFamily, []*am.Measurement) {
+func fakeSummaryFamily() (*dto.MetricFamily, []*am.Measurement) {
+	name := "some_summary"
+	path := "path"
+	index := "index"
+	typ := dto.MetricType_SUMMARY
+	cnt := uint64(2)
+	sum := float64(20.0)
+
+	return &dto.MetricFamily{
+			Name: &name,
+			Type: &typ,
+			Metric: []*dto.Metric{
+				{
+					Label: []*dto.LabelPair{
+						&dto.LabelPair{Name: &path, Value: &index},
+					},
+					Summary: &dto.Summary{SampleCount: &cnt, SampleSum: &sum},
+				},
+			},
+		}, []*am.Measurement{
+			{
+				Name:  "some_summary.path_index",
+				Value: 20,
+				Type:  "g",
+			},
+			{
+				Name:  "some_summary.path_index",
+				Value: 2,
+				Type:  "c",
+			},
+		}
+}
+
+// Summaries are time based, and so very hard to actually test as
+// integration tests with a web handler as we can with counters and
+// gauges. This test provides much of the same functionality as
+// TestPromPoller, but assumes summaries will simply be included in
+// the exposition.
+func TestSummaryNaming(t *testing.T) {
+	family, exps := fakeSummaryFamily()
+
+	out, ok := familyToMeasurements(family)
+	if !ok {
+		t.Fatalf("got %b, want true", ok)
+	}
+	if len(out) != 2 {
+		t.Fatalf("got len(%d), want len(2)", len(out))
+	}
+
+	for i, got := range out {
+		want := exps[i]
+		if want.Name != got.Name {
+			t.Errorf("want(name) = %v, got(name) = %v", want.Name, got.Name)
+		}
+		if want.Value != got.Value {
+			t.Errorf("want(value) = %f, got(value) = %f", want.Value, got.Value)
+		}
+		if want.Type != got.Type {
+			t.Errorf("want(type) = %v, got(type) = %v", want.Type, got.Type)
+		}
+	}
+}
+
+func fakeCounterFamily() (*dto.MetricFamily, []*am.Measurement) {
 	sc := "some_counter"
 	mt := dto.MetricType_COUNTER
 	t00 := "200"
@@ -166,7 +231,7 @@ func fakeMetricFamily() (*dto.MetricFamily, []*am.Measurement) {
 }
 
 func TestPollerSync(t *testing.T) {
-	mf, expected := fakeMetricFamily()
+	mf, expected := fakeCounterFamily()
 
 	inbox := make(chan *am.Measurement, 2)
 	poller := Poller{Inbox: inbox}
