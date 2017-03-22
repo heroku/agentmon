@@ -183,12 +183,14 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 				Timestamp: msToTime(m.GetTimestampMs()),
 				Type:      "g",
 				Value:     summary.GetSampleSum(),
+				Sample:    1.0,
 			})
 			out = append(out, &ag.Measurement{
 				Name:      name + suffixFor(m),
 				Timestamp: msToTime(m.GetTimestampMs()),
 				Type:      "c",
 				Value:     float64(summary.GetSampleCount()),
+				Sample:    1.0,
 			})
 			ok = true
 		}
