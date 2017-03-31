@@ -232,22 +232,22 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 	case dto.MetricType_GAUGE:
 		for _, m := range mf.Metric {
 			out = append(out, &ag.Measurement{
-				Name:      name + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.Gauge,
-				Value:     getValue(m),
-				Sample:    1.0,
+				Name:       name + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.Gauge,
+				Value:      getValue(m),
+				SampleRate: 1.0,
 			})
 			ok = true
 		}
 	case dto.MetricType_COUNTER:
 		for _, m := range mf.Metric {
 			out = append(out, &ag.Measurement{
-				Name:      name + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.DerivedCounter,
-				Value:     getValue(m),
-				Sample:    1.0,
+				Name:       name + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.DerivedCounter,
+				Value:      getValue(m),
+				SampleRate: 1.0,
 			})
 			ok = true
 		}
@@ -255,18 +255,18 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 		for _, m := range mf.Metric {
 			summary := m.GetSummary()
 			out = append(out, &ag.Measurement{
-				Name:      name + "_sum" + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.DerivedCounter,
-				Value:     summary.GetSampleSum(),
-				Sample:    1.0,
+				Name:       name + "_sum" + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.DerivedCounter,
+				Value:      summary.GetSampleSum(),
+				SampleRate: 1.0,
 			})
 			out = append(out, &ag.Measurement{
-				Name:      name + "_count" + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.DerivedCounter,
-				Value:     float64(summary.GetSampleCount()),
-				Sample:    1.0,
+				Name:       name + "_count" + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.DerivedCounter,
+				Value:      float64(summary.GetSampleCount()),
+				SampleRate: 1.0,
 			})
 			ok = true
 		}

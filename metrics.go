@@ -35,9 +35,9 @@ type Measurement struct {
 	// For Gauges, the amendment might be "replace".
 	Value float64
 
-	// Sample stores the sample rate that this measurement was taken at.
+	// SampleRate that this measurement was taken at.
 	// For most applications, this should be set to 1.0
-	Sample float32
+	SampleRate float32
 
 	// Modifier allows gauges to be treated differently
 	//
@@ -79,7 +79,7 @@ func NewMetricSet(parent *MetricSet) *MetricSet {
 func (ms *MetricSet) Update(m *Measurement) {
 	switch m.Type {
 	case Counter:
-		ms.Counters[m.Name] += m.Value / float64(m.Sample)
+		ms.Counters[m.Name] += m.Value / float64(m.SampleRate)
 
 	case DerivedCounter:
 		current := m.Value
@@ -91,7 +91,7 @@ func (ms *MetricSet) Update(m *Measurement) {
 			prev = ms.parent.monoCounters[m.Name]
 		}
 
-		val := current / float64(m.Sample)
+		val := current / float64(m.SampleRate)
 		if current < prev { // A reset has occurred
 			ms.Counters[m.Name] += val
 		} else {
@@ -104,7 +104,7 @@ func (ms *MetricSet) Update(m *Measurement) {
 			prev = ms.parent.Gauges[m.Name]
 		}
 
-		val := (m.Value / float64(m.Sample))
+		val := (m.Value / float64(m.SampleRate))
 
 		switch m.Modifier {
 		case "+":

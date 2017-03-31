@@ -95,50 +95,50 @@ func TestParse(t *testing.T) {
 	testCases := map[string]map[string]*am.Measurement{
 		"Counters": map[string]*am.Measurement{
 			"gorets:1|c": &am.Measurement{
-				Name:     "gorets",
-				Value:    1.0,
-				Sample:   1.0,
-				Type:     am.Counter,
-				Modifier: "",
+				Name:       "gorets",
+				Value:      1.0,
+				SampleRate: 1.0,
+				Type:       am.Counter,
+				Modifier:   "",
 			},
 			"gorets:1|c|@0.1": &am.Measurement{
-				Name:     "gorets",
-				Value:    1.0,
-				Sample:   0.1,
-				Type:     am.Counter,
-				Modifier: "",
+				Name:       "gorets",
+				Value:      1.0,
+				SampleRate: 0.1,
+				Type:       am.Counter,
+				Modifier:   "",
 			},
 		},
 		"Gauges": map[string]*am.Measurement{
 			"gaugor:333|g": &am.Measurement{
-				Name:     "gaugor",
-				Value:    333,
-				Sample:   1.0,
-				Type:     am.Gauge,
-				Modifier: "",
+				Name:       "gaugor",
+				Value:      333,
+				SampleRate: 1.0,
+				Type:       am.Gauge,
+				Modifier:   "",
 			},
 			"gaugor:+4.4|g": &am.Measurement{
-				Name:     "gaugor",
-				Value:    4.4,
-				Sample:   1.0,
-				Type:     am.Gauge,
-				Modifier: "+",
+				Name:       "gaugor",
+				Value:      4.4,
+				SampleRate: 1.0,
+				Type:       am.Gauge,
+				Modifier:   "+",
 			},
 			"gaugor:-14.2|g": &am.Measurement{
-				Name:     "gaugor",
-				Value:    14.2,
-				Sample:   1.0,
-				Type:     am.Gauge,
-				Modifier: "-",
+				Name:       "gaugor",
+				Value:      14.2,
+				SampleRate: 1.0,
+				Type:       am.Gauge,
+				Modifier:   "-",
 			},
 		},
 		"Timers": map[string]*am.Measurement{
 			"glork:320|ms|@0.1": &am.Measurement{
-				Name:     "glork",
-				Value:    320.0,
-				Sample:   0.1,
-				Type:     am.Timer,
-				Modifier: "",
+				Name:       "glork",
+				Value:      320.0,
+				SampleRate: 0.1,
+				Type:       am.Timer,
+				Modifier:   "",
 			},
 		},
 	}
@@ -159,8 +159,8 @@ func TestParse(t *testing.T) {
 				if out.Value != exp.Value {
 					t.Errorf("Expected value=%f, got %f", exp.Value, out.Value)
 				}
-				if out.Sample != exp.Sample {
-					t.Errorf("Expected sample=%f, got %f", exp.Sample, out.Sample)
+				if out.SampleRate != exp.SampleRate {
+					t.Errorf("Expected sample=%f, got %f", exp.SampleRate, out.SampleRate)
 				}
 				if out.Type != exp.Type {
 					t.Errorf("Expected type=%q, got %q", exp.Type, out.Type)

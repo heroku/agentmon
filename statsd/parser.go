@@ -191,11 +191,11 @@ func (p *Parser) parseLine(line []byte) (*agentmon.Measurement, error) {
 	}
 
 	out := &agentmon.Measurement{
-		Name:      string(name),
-		Timestamp: time.Now(),
-		Type:      stringToMetricType(string(measureType)),
-		Value:     value,
-		Sample:    sample,
+		Name:       string(name),
+		Timestamp:  time.Now(),
+		Type:       stringToMetricType(string(measureType)),
+		Value:      value,
+		SampleRate: sample,
 	}
 
 	if sign > 0 {
