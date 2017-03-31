@@ -14,7 +14,7 @@ import (
 
 func makeTestHandler(t *testing.T, found chan string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var set agentmon.MeasurementSet
+		var set agentmon.MetricSet
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&set)
 		if err != nil {

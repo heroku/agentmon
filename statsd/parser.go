@@ -12,8 +12,12 @@ import (
 	"github.com/heroku/agentmon"
 )
 
+// Debug is likely something that can be eliminated
+// TODO(apg)
 var Debug = true
 
+// Parser contains the state necessary to parse statsd protocol messages from
+// an arbitrary reader.
 type Parser struct {
 	reader       io.Reader
 	buffer       []byte
@@ -22,6 +26,12 @@ type Parser struct {
 	done         bool
 }
 
+// NewParser constructs a statsd parser.
+//
+// When partialReads is true, it is expected that a read (of
+// maxReadSize) on the Reader may not produce a complete statsd
+// message. On the next successful read, the partially read message
+// will attempt to be completed.
 func NewParser(r io.Reader, partialReads bool, maxReadSize int) *Parser {
 	return &Parser{
 		reader:       r,
@@ -31,6 +41,7 @@ func NewParser(r io.Reader, partialReads bool, maxReadSize int) *Parser {
 	}
 }
 
+// Next returns the next measurement parsed from the parser's Reader.
 func (p *Parser) Next() (*agentmon.Measurement, bool) {
 	buf := p.buffer
 
@@ -172,20 +183,19 @@ func (p *Parser) parseLine(line []byte) (*agentmon.Measurement, error) {
 	}
 
 	if len(rawSample) > 0 {
-		if samp, err := strconv.ParseFloat(string(rawSample), 64); err != nil {
+		samp, err := strconv.ParseFloat(string(rawSample), 64)
+		if err != nil {
 			return nil, fmt.Errorf("failed to ParseFloat %q: %s", string(rawSample), err)
-		} else {
-			sample = float32(samp)
 		}
-
+		sample = float32(samp)
 	}
 
 	out := &agentmon.Measurement{
-		Name:      string(name),
-		Timestamp: time.Now(),
-		Type:      stringToMetricType(string(measureType)),
-		Value:     value,
-		Sample:    sample,
+		Name:       string(name),
+		Timestamp:  time.Now(),
+		Type:       stringToMetricType(string(measureType)),
+		Value:      value,
+		SampleRate: sample,
 	}
 
 	if sign > 0 {

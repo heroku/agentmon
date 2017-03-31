@@ -26,14 +26,28 @@ const (
 	promProto           = "io.prometheus.client.MetricFamily"
 )
 
+// Poller defined parameters for scraping a Prometheus endpoint, over HTTP.
 type Poller struct {
-	URL          *url.URL
-	Interval     time.Duration
+	// URL that the poller should scrape.
+	URL *url.URL
+
+	// Interval is the amount of time that should pass between scrapes.
+	Interval time.Duration
+
+	// AcceptHeader is used to negotiate the exposition format from the
+	// Prometheus endpoint.
 	AcceptHeader string
-	Inbox        chan *ag.Measurement
-	Debug        bool
+
+	// Inbox is the channel to use to observe scraped measurements.
+	Inbox chan *ag.Measurement
+
+	// Debug is used to turn on extended logging, useful for debugging
+	// purposes.
+	Debug bool
 }
 
+// Poll performs a scrape of the Prometheus endpoint every Poller.Interval.
+// The measurements found while scraping will be sent to Poller.Inbox.
 func (p Poller) Poll(ctx context.Context) {
 	if p.Interval == 0 {
 		p.Interval = defaultPollInterval
@@ -85,7 +99,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 	u := p.URL.String()
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		log.Fatalf("fetchFamilies: http.newrequest: failed: %s", u, err)
+		log.Fatalf("fetchFamilies: http.newrequest: failed: %s", err)
 	}
 
 	req = req.WithContext(ctx)
@@ -106,7 +120,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("fetchFamilies: bad status: %s", u, resp.Status)
+		log.Fatalf("fetchFamilies: bad status: %s", resp.Status)
 	}
 
 	familyCount := 0
@@ -218,22 +232,22 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 	case dto.MetricType_GAUGE:
 		for _, m := range mf.Metric {
 			out = append(out, &ag.Measurement{
-				Name:      name + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.Gauge,
-				Value:     getValue(m),
-				Sample:    1.0,
+				Name:       name + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.Gauge,
+				Value:      getValue(m),
+				SampleRate: 1.0,
 			})
 			ok = true
 		}
 	case dto.MetricType_COUNTER:
 		for _, m := range mf.Metric {
 			out = append(out, &ag.Measurement{
-				Name:      name + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.DerivedCounter,
-				Value:     getValue(m),
-				Sample:    1.0,
+				Name:       name + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.DerivedCounter,
+				Value:      getValue(m),
+				SampleRate: 1.0,
 			})
 			ok = true
 		}
@@ -241,18 +255,18 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 		for _, m := range mf.Metric {
 			summary := m.GetSummary()
 			out = append(out, &ag.Measurement{
-				Name:      name + "_sum" + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.DerivedCounter,
-				Value:     summary.GetSampleSum(),
-				Sample:    1.0,
+				Name:       name + "_sum" + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.DerivedCounter,
+				Value:      summary.GetSampleSum(),
+				SampleRate: 1.0,
 			})
 			out = append(out, &ag.Measurement{
-				Name:      name + "_count" + suffixFor(m),
-				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      ag.DerivedCounter,
-				Value:     float64(summary.GetSampleCount()),
-				Sample:    1.0,
+				Name:       name + "_count" + suffixFor(m),
+				Timestamp:  msToTime(m.GetTimestampMs()),
+				Type:       ag.DerivedCounter,
+				Value:      float64(summary.GetSampleCount()),
+				SampleRate: 1.0,
 			})
 			ok = true
 		}

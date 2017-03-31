@@ -13,14 +13,26 @@ const (
 	defaultMaxPacketSizeUDP = 1472
 )
 
+// Listener defines the parameters needed to accept statsd protocol
+// UDP packets.
 type Listener struct {
+	// MaxPacketSize is the maximum amount of bytes that will be read per incoming statsd datagram.
 	MaxPacketSize int64
-	Addr          string
-	PartialReads  bool
-	Inbox         chan *agentmon.Measurement
-	Debug         bool
+
+	// Addr is the address to be used for listening for UDP datagrams.
+	Addr string
+
+	PartialReads bool
+
+	// Inbox is the channel to use to observe incoming measurements
+	Inbox chan *agentmon.Measurement
+
+	// Debug is used to turn on extended logging, useful for debugging
+	// purposes.
+	Debug bool
 }
 
+// ListenUDP sets
 func (s Listener) ListenUDP(ctx context.Context) {
 	resAddr, err := net.ResolveUDPAddr("udp", s.Addr)
 	if err != nil {
