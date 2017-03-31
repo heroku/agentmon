@@ -144,12 +144,12 @@ func fakeSummaryFamily() (*dto.MetricFamily, []*am.Measurement) {
 			},
 		}, []*am.Measurement{
 			{
-				Name:  "some_summary.path_index",
+				Name:  "some_summary_sum.path_index",
 				Value: 20,
 				Type:  am.DerivedCounter,
 			},
 			{
-				Name:  "some_summary.path_index",
+				Name:  "some_summary_count.path_index",
 				Value: 2,
 				Type:  am.DerivedCounter,
 			},
