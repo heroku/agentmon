@@ -26,14 +26,28 @@ const (
 	promProto           = "io.prometheus.client.MetricFamily"
 )
 
+// Poller defined parameters for scraping a Prometheus endpoint, over HTTP.
 type Poller struct {
-	URL          *url.URL
-	Interval     time.Duration
+	// URL is the URL that the poller should scrape.
+	URL *url.URL
+
+	// Interval is the amount of time that should pass between scrapes.
+	Interval time.Duration
+
+	// AcceptHeader is used to negotiate the exposition format from the
+	// Prometheus endpoint.
 	AcceptHeader string
-	Inbox        chan *ag.Measurement
-	Debug        bool
+
+	// Inbox is the channel to use to observe scraped measurements.
+	Inbox chan *ag.Measurement
+
+	// Debug is used to turn on extended logging, useful for debugging
+	// purposes.
+	Debug bool
 }
 
+// Poll performs a scrape of the Prometheus endpoint every Poller.Interval.
+// The measurements found while scraping will be sent to Poller.Inbox.
 func (p Poller) Poll(ctx context.Context) {
 	if p.Interval == 0 {
 		p.Interval = defaultPollInterval
@@ -85,7 +99,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 	u := p.URL.String()
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
-		log.Fatalf("fetchFamilies: http.newrequest: failed: %s", u, err)
+		log.Fatalf("fetchFamilies: http.newrequest: failed: %s", err)
 	}
 
 	req = req.WithContext(ctx)
@@ -106,7 +120,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("fetchFamilies: bad status: %s", u, resp.Status)
+		log.Fatalf("fetchFamilies: bad status: %s", resp.Status)
 	}
 
 	familyCount := 0
