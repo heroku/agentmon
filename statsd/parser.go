@@ -183,7 +183,8 @@ func (p *Parser) parseLine(line []byte) (*agentmon.Measurement, error) {
 	}
 
 	if len(rawSample) > 0 {
-		if samp, err := strconv.ParseFloat(string(rawSample), 64); err != nil {
+		samp, err := strconv.ParseFloat(string(rawSample), 64)
+		if err != nil {
 			return nil, fmt.Errorf("failed to ParseFloat %q: %s", string(rawSample), err)
 		}
 		sample = float32(samp)

@@ -11,7 +11,7 @@ type event struct {
 }
 
 func driveTest(t *testing.T, events []event) {
-	underTest := NewMeasurementSet(nil)
+	underTest := NewMetricSet(nil)
 	for i, e := range events {
 		underTest.Update(&(e.m))
 		var got float64
@@ -26,7 +26,7 @@ func driveTest(t *testing.T, events []event) {
 			t.Errorf("after event %d: got %f, want %f", i+1, got, e.want)
 		}
 
-		underTest = NewMeasurementSet(underTest.Snapshot())
+		underTest = NewMetricSet(underTest.Snapshot())
 	}
 }
 
@@ -200,8 +200,8 @@ func TestGauges(t *testing.T) {
 	driveTest(t, events)
 }
 
-func TestMeasurementSetLen(t *testing.T) {
-	underTest := NewMeasurementSet(nil)
+func TestMetricSetLen(t *testing.T) {
+	underTest := NewMetricSet(nil)
 	underTest.Update(&Measurement{
 		Name:      "foo.bar",
 		Timestamp: time.Now(),
@@ -223,8 +223,8 @@ func TestMeasurementSetLen(t *testing.T) {
 	}
 }
 
-func TestMeasurementSetSnapshot(t *testing.T) {
-	underTest := NewMeasurementSet(nil)
+func TestMetricSetSnapshot(t *testing.T) {
+	underTest := NewMetricSet(nil)
 	underTest.Update(&Measurement{
 		Name:      "foo.bar",
 		Timestamp: time.Now(),
