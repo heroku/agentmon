@@ -25,10 +25,10 @@ type Measurement struct {
 	// Name is the metric to contribute to.
 	Name string
 
-	// Timestamp is the time at which the measurement was taken.
+	// Timestamp at which the measurement was taken.
 	Timestamp time.Time
 
-	// Type is the type of the metric we wish to amend.
+	// Type of the metric we wish to amend.
 	Type MetricType
 
 	// Value is the amount by which we will amend the metric.
