@@ -19,15 +19,26 @@ const (
 	headerMeasurementsTime  = "Measurements-Time"
 )
 
-// Heroku reporter
+// Heroku reporter stores the parameters necessary to report Metrics to
+// Heroku's metrics ingestion endpoint.
 type Heroku struct {
-	URL      string
+	// URL is the URL of the Heroku service.
+	URL string
+
+	// Interval is the duration in which to wait before sending the next
+	// MetricSet.
 	Interval time.Duration
-	Inbox    chan *am.Measurement
-	Debug    bool
+
+	// Inbox is the channel Measurements from pollers and listeners are
+	// received on.
+	Inbox chan *am.Measurement
+
+	// Debug turns on more verbose logging.
+	Debug bool
 }
 
-// Report measurments to Heroku
+// Report reads measurements from Inbox, and produces MetricSets that get
+// sent to the Heroku metrics service.
 func (r Heroku) Report(ctx context.Context) {
 	if r.Interval <= 0 {
 		r.Interval = defaultHerokuReporterInterval
