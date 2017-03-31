@@ -41,28 +41,32 @@ func NewMeasurementSet(parent *MeasurementSet) *MeasurementSet {
 func (ms *MeasurementSet) Update(m *Measurement) {
 	switch m.Type {
 	case Counter:
-		ms.Counters[m.Name] += m.Value * (1 / float64(m.Sample))
+		ms.Counters[m.Name] += m.Value / float64(m.Sample)
 
 	case DerivedCounter:
-		ms.monoCounters[m.Name] = m.Value
-		val := m.Value
+		current := m.Value
+		prev := 0.0
+
+		ms.monoCounters[m.Name] = current
+
 		if ms.parent != nil {
-			if v, ok := ms.parent.monoCounters[m.Name]; ok {
-				val = val - v
-			}
+			prev = ms.parent.monoCounters[m.Name]
 		}
-		ms.Counters[m.Name] += val * (1 / float64(m.Sample))
+
+		val := current / float64(m.Sample)
+		if current < prev { // A reset has occurred
+			ms.Counters[m.Name] = val
+		} else {
+			ms.Counters[m.Name] = val - prev
+		}
 
 	case Gauge:
-		val := m.Value
 		prev := 0.0
 		if ms.parent != nil {
-			if v, ok := ms.parent.Gauges[m.Name]; ok {
-				prev = v
-			}
+			prev = ms.parent.Gauges[m.Name]
 		}
 
-		val *= (1 / float64(m.Sample))
+		val := (m.Value / float64(m.Sample))
 
 		switch m.Modifier {
 		case "+":
@@ -70,7 +74,7 @@ func (ms *MeasurementSet) Update(m *Measurement) {
 		case "-":
 			ms.Gauges[m.Name] = prev - val
 		default:
-			ms.Gauges[m.Name] += val
+			ms.Gauges[m.Name] = val
 		}
 	}
 }
