@@ -33,7 +33,7 @@ func (r Heroku) Report(ctx context.Context) {
 		r.Interval = defaultHerokuReporterInterval
 	}
 
-	measurements := am.NewMeasurementSet()
+	currentSet := am.NewMeasurementSet(nil)
 	ticks := time.Tick(r.Interval)
 
 	for {
@@ -44,12 +44,11 @@ func (r Heroku) Report(ctx context.Context) {
 			}
 			return
 		case m := <-r.Inbox:
-			measurements.Update(m)
+			currentSet.Update(m)
 		case <-ticks:
-			out := measurements
-			measurements = am.NewMeasurementSet()
-
-			go r.flush(ctx, out)
+			flushSet := currentSet.Snapshot()
+			currentSet = am.NewMeasurementSet(flushSet)
+			go r.flush(ctx, flushSet)
 		}
 	}
 }

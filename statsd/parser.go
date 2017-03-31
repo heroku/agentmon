@@ -183,7 +183,7 @@ func (p *Parser) parseLine(line []byte) (*agentmon.Measurement, error) {
 	out := &agentmon.Measurement{
 		Name:      string(name),
 		Timestamp: time.Now(),
-		Type:      string(measureType),
+		Type:      stringToMetricType(string(measureType)),
 		Value:     value,
 		Sample:    sample,
 	}
@@ -193,6 +193,17 @@ func (p *Parser) parseLine(line []byte) (*agentmon.Measurement, error) {
 	}
 
 	return out, nil
+}
+
+func stringToMetricType(s string) agentmon.MetricType {
+	switch s {
+	case "c":
+		return agentmon.Counter
+	case "ms":
+		return agentmon.Timer
+	default:
+		return agentmon.Gauge
+	}
 }
 
 func readMetricName(buf []byte) ([]byte, []byte, error) {

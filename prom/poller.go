@@ -220,7 +220,7 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 			out = append(out, &ag.Measurement{
 				Name:      name + suffixFor(m),
 				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      "g",
+				Type:      ag.Gauge,
 				Value:     getValue(m),
 				Sample:    1.0,
 			})
@@ -231,7 +231,7 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 			out = append(out, &ag.Measurement{
 				Name:      name + suffixFor(m),
 				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      "c",
+				Type:      ag.DerivedCounter,
 				Value:     getValue(m),
 				Sample:    1.0,
 			})
@@ -241,16 +241,16 @@ func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool)
 		for _, m := range mf.Metric {
 			summary := m.GetSummary()
 			out = append(out, &ag.Measurement{
-				Name:      name + suffixFor(m),
+				Name:      name + "_sum" + suffixFor(m),
 				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      "g",
+				Type:      ag.DerivedCounter,
 				Value:     summary.GetSampleSum(),
 				Sample:    1.0,
 			})
 			out = append(out, &ag.Measurement{
-				Name:      name + suffixFor(m),
+				Name:      name + "_count" + suffixFor(m),
 				Timestamp: msToTime(m.GetTimestampMs()),
-				Type:      "c",
+				Type:      ag.DerivedCounter,
 				Value:     float64(summary.GetSampleCount()),
 				Sample:    1.0,
 			})

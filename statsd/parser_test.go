@@ -43,17 +43,17 @@ gaugor:333|g
 		&am.Measurement{
 			Name:  "gorets",
 			Value: 1.0,
-			Type:  "c",
+			Type:  am.Counter,
 		},
 		&am.Measurement{
 			Name:  "gorets",
 			Value: 1.0,
-			Type:  "c",
+			Type:  am.Counter,
 		},
 		&am.Measurement{
 			Name:  "gaugor",
 			Value: 333.0,
-			Type:  "g",
+			Type:  am.Gauge,
 		},
 	}
 
@@ -72,17 +72,17 @@ gaugor:333|g
 		&am.Measurement{
 			Name:  "gorets",
 			Value: 1.0,
-			Type:  "c",
+			Type:  am.Counter,
 		},
 		&am.Measurement{
 			Name:  "gorets",
 			Value: 1.0,
-			Type:  "c",
+			Type:  am.Counter,
 		},
 		&am.Measurement{
 			Name:  "gaugor",
 			Value: 333.0,
-			Type:  "g",
+			Type:  am.Gauge,
 		},
 	}
 
@@ -98,14 +98,14 @@ func TestParse(t *testing.T) {
 				Name:     "gorets",
 				Value:    1.0,
 				Sample:   1.0,
-				Type:     "c",
+				Type:     am.Counter,
 				Modifier: "",
 			},
 			"gorets:1|c|@0.1": &am.Measurement{
 				Name:     "gorets",
 				Value:    1.0,
 				Sample:   0.1,
-				Type:     "c",
+				Type:     am.Counter,
 				Modifier: "",
 			},
 		},
@@ -114,21 +114,21 @@ func TestParse(t *testing.T) {
 				Name:     "gaugor",
 				Value:    333,
 				Sample:   1.0,
-				Type:     "g",
+				Type:     am.Gauge,
 				Modifier: "",
 			},
 			"gaugor:+4.4|g": &am.Measurement{
 				Name:     "gaugor",
 				Value:    4.4,
 				Sample:   1.0,
-				Type:     "g",
+				Type:     am.Gauge,
 				Modifier: "+",
 			},
 			"gaugor:-14.2|g": &am.Measurement{
 				Name:     "gaugor",
 				Value:    14.2,
 				Sample:   1.0,
-				Type:     "g",
+				Type:     am.Gauge,
 				Modifier: "-",
 			},
 		},
@@ -137,7 +137,7 @@ func TestParse(t *testing.T) {
 				Name:     "glork",
 				Value:    320.0,
 				Sample:   0.1,
-				Type:     "ms",
+				Type:     am.Timer,
 				Modifier: "",
 			},
 		},
