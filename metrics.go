@@ -75,14 +75,18 @@ func (ms *MeasurementSet) Update(m *Measurement) {
 
 func (ms *MeasurementSet) Snapshot() *MeasurementSet {
 	out := &MeasurementSet{
-		Counters: make(map[string]float64),
-		Gauges:   make(map[string]float64),
+		Counters:     make(map[string]float64),
+		Gauges:       make(map[string]float64),
+		monoCounters: make(map[string]float64),
 	}
 	for k, v := range ms.Counters {
 		out.Counters[k] = v
 	}
 	for k, v := range ms.Gauges {
 		out.Gauges[k] = v
+	}
+	for k, v := range ms.monoCounters {
+		out.monoCounters[k] = v
 	}
 
 	return out
