@@ -28,7 +28,7 @@ const (
 
 // Poller defined parameters for scraping a Prometheus endpoint, over HTTP.
 type Poller struct {
-	// URL is the URL that the poller should scrape.
+	// URL that the poller should scrape.
 	URL *url.URL
 
 	// Interval is the amount of time that should pass between scrapes.
