@@ -35,17 +35,17 @@ gaugor:333|g
 		&am.Measurement{
 			Name:  "gorets",
 			Value: 1.0,
-			Type:  "c",
+			Type:  am.Counter,
 		},
 		&am.Measurement{
 			Name:  "gorets",
 			Value: 1.0,
-			Type:  "c",
+			Type:  am.Counter,
 		},
 		&am.Measurement{
 			Name:  "gaugor",
 			Value: 333.0,
-			Type:  "g",
+			Type:  am.Gauge,
 		},
 	}
 

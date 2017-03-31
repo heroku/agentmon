@@ -2,10 +2,21 @@ package agentmon
 
 import "time"
 
+type MetricType int
+
+const (
+	Counter MetricType = iota
+	DerivedCounter
+	Gauge
+
+	// Currently unused, except in statsd parsing.
+	Timer
+)
+
 type Measurement struct {
 	Name      string
 	Timestamp time.Time
-	Type      string
+	Type      MetricType
 	Value     float64
 	Sample    float32
 	Modifier  string
@@ -25,10 +36,11 @@ func NewMeasurementSet() *MeasurementSet {
 
 func (ms *MeasurementSet) Update(m *Measurement) {
 	switch m.Type {
-	case "c":
+	case Counter:
 		ms.Counters[m.Name] += m.Value * (1 / float64(m.Sample))
-	case "g":
-		ms.Gauges[m.Name] += m.Value * (1 / float64(m.Sample))
+
+	case DerivedCounter:
+	case Gauge:
 	}
 }
 
