@@ -22,15 +22,15 @@ type Measurement struct {
 	Modifier  string
 }
 
-type MeasurementSet struct {
+type MetricSet struct {
 	Counters     map[string]float64 `json:"counters,omitempty"`
 	Gauges       map[string]float64 `json:"gauges,omitempty"`
 	monoCounters map[string]float64
-	parent       *MeasurementSet
+	parent       *MetricSet
 }
 
-func NewMeasurementSet(parent *MeasurementSet) *MeasurementSet {
-	return &MeasurementSet{
+func NewMeasurementSet(parent *MetricSet) *MetricSet {
+	return &MetricSet{
 		Counters:     make(map[string]float64),
 		Gauges:       make(map[string]float64),
 		monoCounters: make(map[string]float64),
@@ -38,7 +38,7 @@ func NewMeasurementSet(parent *MeasurementSet) *MeasurementSet {
 	}
 }
 
-func (ms *MeasurementSet) Update(m *Measurement) {
+func (ms *MetricSet) Update(m *Measurement) {
 	switch m.Type {
 	case Counter:
 		ms.Counters[m.Name] += m.Value / float64(m.Sample)
@@ -79,8 +79,8 @@ func (ms *MeasurementSet) Update(m *Measurement) {
 	}
 }
 
-func (ms *MeasurementSet) Snapshot() *MeasurementSet {
-	out := &MeasurementSet{
+func (ms *MetricSet) Snapshot() *MetricSet {
+	out := &MetricSet{
 		Counters:     make(map[string]float64),
 		Gauges:       make(map[string]float64),
 		monoCounters: make(map[string]float64),
@@ -98,6 +98,6 @@ func (ms *MeasurementSet) Snapshot() *MeasurementSet {
 	return out
 }
 
-func (ms *MeasurementSet) Len() int {
+func (ms *MetricSet) Len() int {
 	return len(ms.Counters) + len(ms.Gauges)
 }

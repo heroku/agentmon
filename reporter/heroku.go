@@ -53,7 +53,7 @@ func (r Heroku) Report(ctx context.Context) {
 	}
 }
 
-func (r Heroku) flush(ctx context.Context, set *am.MeasurementSet) {
+func (r Heroku) flush(ctx context.Context, set *am.MetricSet) {
 	l := set.Len()
 	if l == 0 {
 		return
