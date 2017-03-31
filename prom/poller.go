@@ -124,6 +124,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 				}
 				log.Fatalln("fetchFamilies: read-pb: failed: %s", err)
 			}
+			p.debugMF("protobuff mf", mf)
 			ch <- mf
 			familyCount++
 		}
@@ -139,6 +140,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 			log.Fatalln("fetchFamilies: read-text: failed: %s", err)
 		}
 		for _, mf := range metricFamilies {
+			p.debugMF("non protobuff mf", mf)
 			ch <- mf
 			familyCount++
 		}
@@ -148,6 +150,66 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 		log.Printf("debug: fetched %d families via %s response from Prometheus\n", familyCount, mtype)
 	}
 	close(ch)
+}
+
+func (p Poller) debugMF(msg string, mf *dto.MetricFamily) {
+	if !p.Debug {
+		return
+	}
+	log.Printf("%s mf.GetName(): %s\n", msg, mf.GetName())
+	switch t := mf.GetType(); t {
+	case dto.MetricType_COUNTER:
+		log.Printf("%d = dto.MetricType_COUNTER\n", t)
+	case dto.MetricType_GAUGE:
+		log.Printf("%d = dto.MetricType_GAUGE\n", t)
+	case dto.MetricType_HISTOGRAM:
+		log.Printf("%d = dto.MetricType_HISTOGRAM\n", t)
+	case dto.MetricType_SUMMARY:
+		log.Printf("%d = dto.MetricType_SUMMARY\n", t)
+	case dto.MetricType_UNTYPED:
+		log.Printf("%d = dto.MetricType_UNTYPED\n", t)
+	default:
+		log.Printf("%d = UNKNOWN!\n", t)
+	}
+	for i, m := range mf.Metric {
+		for j, lp := range m.GetLabel() {
+			log.Printf("metric %d: lp %d: GetName(): %q GetValue: %q\n", i, j, lp.GetName(), lp.GetValue())
+		}
+		log.Printf("metric %d: m.GetTimestampsMs(): %d\n", i, m.GetTimestampMs())
+		if c := m.GetCounter(); c != nil {
+			log.Printf("metric %d: m.GetCounter().String(): %q\n", i, c.String())
+			log.Printf("metric %d: m.GetCounter().GetValue(): %f\n", i, c.GetValue())
+		}
+		if g := m.GetGauge(); g != nil {
+			log.Printf("metric %d: m.GetGauge().String(): %q\n", i, g.String())
+			log.Printf("metric %d: m.GetGauge().GetVaue(): %f\n", i, g.GetValue())
+		}
+		if h := m.GetHistogram(); h != nil {
+			log.Printf("metric %d: m.GetHistogram().String(): %q\n", i, h.String())
+			log.Printf("metric %d: h.GetSampleCount(): %d\n", i, h.GetSampleCount())
+			log.Printf("metric %d: h.GetSampleSum(): %f\n", i, h.GetSampleSum())
+			for j, b := range h.GetBucket() {
+				log.Printf("metric %d: bucket %d: b.String(): %q\n", i, j, b.String())
+				log.Printf("metric %d: bucket %d: b.GetCumulativeCount(): %d\n", i, j, b.GetCumulativeCount())
+				log.Printf("metric %d: bucket %d: b.GetUpperBound(): %f\n", i, j, b.GetUpperBound())
+			}
+		}
+		if s := m.GetSummary(); s != nil {
+			log.Printf("metric %d: m.GetSummary().String(): %q\n", i, s.String())
+			log.Printf("metric %d: m.GetSummary().GetSampleCount(): %d\n", i, s.GetSampleCount())
+			log.Printf("metric %d: m.GetSummary().GetSampleSum(): %f\n", i, s.GetSampleSum())
+			for j, q := range s.GetQuantile() {
+				log.Printf("metric %d: quantile %d: q.String(): %q\n", i, j, q.String())
+				log.Printf("metric %d: quantile %d: q.GetQuantile(): %f\n", i, j, q.GetQuantile())
+				log.Printf("metric %d: quantile %d: q.GetValue(): %f\n", i, j, q.GetValue())
+			}
+		}
+		if u := m.GetUntyped(); u != nil {
+			log.Printf("metric %d: m.GetUntyped().String(): %q\n", i, u.String())
+			log.Printf("metric %d: m.GetUntyped().GetValue(): %f\n", i, u.GetValue())
+		}
+	}
+	log.Println("--------------------------------------------")
 }
 
 func familyToMeasurements(mf *dto.MetricFamily) (out []*ag.Measurement, ok bool) {
