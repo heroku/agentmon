@@ -62,7 +62,14 @@ func (ms *MeasurementSet) Update(m *Measurement) {
 			}
 		}
 
-		ms.Gauges[m.Name] += val * (1 / float64(m.Sample))
+		switch m.Modifier {
+		case "+":
+			ms.Gauges[m.Name] = prev + val
+		case "-":
+			ms.Gauges[m.Name] = prev - val
+		default:
+			ms.Gauges[m.Name] += val * (1 / float64(m.Sample))
+		}
 	}
 }
 
