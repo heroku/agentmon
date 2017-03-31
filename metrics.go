@@ -55,9 +55,9 @@ func (ms *MeasurementSet) Update(m *Measurement) {
 
 		val := current / float64(m.Sample)
 		if current < prev { // A reset has occurred
-			ms.Counters[m.Name] = val
+			ms.Counters[m.Name] += val
 		} else {
-			ms.Counters[m.Name] = val - prev
+			ms.Counters[m.Name] += val - prev
 		}
 
 	case Gauge:
