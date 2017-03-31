@@ -102,7 +102,43 @@ func TestDerivedCounters(t *testing.T) {
 	}
 
 	driveTest(t, events)
+}
 
+func TestDerivedCountersWithRest(t *testing.T) {
+	events := []event{
+		{
+			m: Measurement{
+				Name:      "foo.bar",
+				Timestamp: time.Now(),
+				Type:      DerivedCounter,
+				Value:     1.0,
+				Sample:    1.0,
+			},
+			want: 1.0,
+		},
+		{
+			m: Measurement{
+				Name:      "foo.bar",
+				Timestamp: time.Now(),
+				Type:      DerivedCounter,
+				Value:     8.0,
+				Sample:    1.0,
+			},
+			want: 7.0,
+		},
+		{
+			m: Measurement{
+				Name:      "foo.bar",
+				Timestamp: time.Now(),
+				Type:      DerivedCounter,
+				Value:     3.0,
+				Sample:    1.0,
+			},
+			want: 3.0,
+		},
+	}
+
+	driveTest(t, events)
 }
 
 func TestGauges(t *testing.T) {
