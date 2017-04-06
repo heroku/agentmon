@@ -8,7 +8,4 @@
 
 ## Copyright
 
-*To be written*
-
-
-
+(c) 2017, Heroku, Inc. See [LICENSE](./LICENSE) for details.
