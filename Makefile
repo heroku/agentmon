@@ -7,14 +7,11 @@ build:
 install:
 	go install -a -ldflags "-X ${LINKER_VERSION_SYMBOL} ${LINKER_VERSION}" ./...
 
+release: GOOS := linux
+release: GOARCH := amd64
 release:
-	{\
-		export GOOS=linux; \
-		export GOARCH=amd64; \
-		go build -ldflags "-X $(LINKER_VERSION_SYMBOL)=$(LINKER_VERSION)" -o agentmon ./cmd/agentmon; \
-		tar czf "agentmon-$(LINKER_VERSION)-$$(echo $$GOOS-$$GOARCH | sed 's;/;-;').tar.gz" agentmon; \
-		rm -rf agentmon; \
-	}
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-X $(LINKER_VERSION_SYMBOL)=$(LINKER_VERSION)" -o agentmon ./cmd/agentmon
+	tar czf "agentmon-$(LINKER_VERSION)-$(GOOS)-$(GOARCH).tar.gz" agentmon
 
 test:
 	CGO_ENABLED=1 go test -v -race ./...
