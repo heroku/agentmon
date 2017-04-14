@@ -12,6 +12,7 @@ release: GOARCH := amd64
 release:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-X $(LINKER_VERSION_SYMBOL)=$(LINKER_VERSION)" -o agentmon ./cmd/agentmon
 	tar czf "agentmon-$(LINKER_VERSION)-$(GOOS)-$(GOARCH).tar.gz" agentmon
+	rm agentmon
 
 test:
 	CGO_ENABLED=1 go test -v -race ./...
