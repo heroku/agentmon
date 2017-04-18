@@ -28,7 +28,7 @@ fi
 # assumes we are in bin, find the directory above that
 cwd="$(cd $(dirname $0); cd ..; pwd)"
 
-${S3CMD} put $1 ${BUCKET}
-echo "$1" >> latest
-${S3CMD} put latest ${BUCKET}
+${S3CMD} put -P $1 ${BUCKET}
+echo "https://agentmon-releases.s3.amazonaws.com/$1" >> latest
+${S3CMD} put -P latest ${BUCKET}
 rm latest
