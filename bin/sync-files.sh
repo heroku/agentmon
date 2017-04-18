@@ -27,6 +27,5 @@ fi
 
 ${S3CMD} put -P $1 ${BUCKET}
 echo "https://agentmon-releases.s3.amazonaws.com/$1" >> latest
-${S3CMD} rm ${BUCKET}latest
 ${S3CMD} put -P latest ${BUCKET}
 rm latest
