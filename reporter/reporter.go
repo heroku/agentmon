@@ -32,6 +32,7 @@ package reporter
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -53,9 +54,10 @@ done:
 		switch {
 		case err != nil:
 			return err
-		case resp.StatusCode >= 500:
-			return fmt.Errorf("upstream service replied with status=%d",
-				resp.StatusCode)
+		case resp.StatusCode >= 400 && resp.StatusCode < 500:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return fmt.Errorf("upstream service replied with status=%d: %q",
+				resp.StatusCode, body)
 		case resp.StatusCode >= 200 && resp.StatusCode < 300:
 			break done
 		default:
