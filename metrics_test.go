@@ -179,9 +179,9 @@ func TestGauges(t *testing.T) {
 				Timestamp:  time.Now(),
 				Type:       Gauge,
 				Value:      1.0,
-				SampleRate: 0.5,
+				SampleRate: 0.5, // SampleRate should be ignored for gauges.
 			},
-			want: 2.0,
+			want: 1.0,
 		},
 		{
 			m: Measurement{

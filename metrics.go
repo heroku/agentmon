@@ -134,15 +134,13 @@ func (ms *MetricSet) Update(m *Measurement) {
 			prev = ms.parent.Gauges[m.Name]
 		}
 
-		val := (m.Value / float64(m.SampleRate))
-
 		switch m.Modifier {
 		case "+":
-			ms.Gauges[m.Name] = prev + val
+			ms.Gauges[m.Name] = prev + m.Value
 		case "-":
-			ms.Gauges[m.Name] = prev - val
+			ms.Gauges[m.Name] = prev - m.Value
 		default:
-			ms.Gauges[m.Name] = val
+			ms.Gauges[m.Name] = m.Value
 		}
 	}
 }
