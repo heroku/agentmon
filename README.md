@@ -14,7 +14,12 @@ be to add `agentmon` to a buildpack and set an environment variable
 id>`. `agentmon` will read the language metrics sink URL from the
 environment variable when it starts and use it to post language
 metrics.
- 
+
+For more about what agentmon actually does, and its modes of
+operation, see [design][design].
+
+## Usage
+
 ```bash
 usage: agentmon [flags] sink-URL 
   -backlog int
@@ -33,19 +38,28 @@ usage: agentmon [flags] sink-URL
         print version string
 ```
 
-#### Run Tests
+## Developing
+
+### Run Tests
+
 ```bash
 make test 
 ``` 
-#### Install
+
+### Install
+
 ```bash
 make install 
 ```
-#### Build
+
+### Build
+
 ```bash
 make build 
 ```
-#### Create Release Package 
+
+### Create Release Package 
+
 ```bash
 make release 
 ```
@@ -57,3 +71,4 @@ make release
 
 [prometheus]: https://github.com/prometheus/prometheus
 [statsd]: https://github.com/b/statsd_spec
+[design]: https://github.com/heroku/agentmon/tree/master/doc/design.md
