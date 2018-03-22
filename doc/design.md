@@ -1,34 +1,34 @@
 # agentmon Unmasked
 
 Fundamentally, `agentmon` is a silly little server that proxies metric
-reporting to a third party, namely, Heroku's Application Metrics endpoint
-available over HTTPS. It's capable of receiving metrics via statsd, and
-offers a simple Prometheus scraper as well. This document discusses the
-way in which all of these things interact.
+reporting to a third party; namely, Heroku's Application Metrics
+endpoint which is available over HTTPS. It's capable of receiving
+metrics via statsd, and offers a simple Prometheus scraper as
+well. This document discusses the way in which all of these things
+interact.
 
 ## Metrics
 
-Those familiar with standard operational metric terminology won't be
-surprised to learn that agentmon has a concept of counters and gauges.
-These behave very similarly to counters and gauges from
-the [statsd][statsd] "protocol". 
+As is standard in the industry for metrics, agentmon has the concepts
+of counters and gauges. These behave in a similar manner to that of
+[statsd][statsd]. 
 
-That is to say, for a time period defined by the flush interval, the
-value of a named counter metric is the sum of all values reported for
-that name.
+That is to say, for a time period defined by some "flush" interval,
+the value of a named counter metric is the sum of all values reported
+for that name.
 
-For a gauge, in that same time period, the last value received for a
+For a gauge, for that same time period, the last value received for a
 given name is the value that will be reported.
 
-Outside of the statsd "protocol," agentmon is also capable of handling
+Outside of the statsd protocol, agentmon is also capable of handling
 monotonically increasing counters as well. Internally, these are called
-"derived counters," and they are simply flushed as regular counters. 
+_derived counters_, and they are simply flushed as regular counters. 
 Each time a measurement is observed, the value added to the counter is
 equal to `{observed value} - {previously observed value}`.
 
 In the [Etsy statsd][etsy-statsd] implementation, counters, and timers
 can have an attached sample rate that is typically used to reduce
-observations sent to statsd, accepting, possibly, a bit less accuracy
+observations sent to statsd accepting, possibly, a bit less accuracy
 in reported observations. Statsd timers, however, are not handled in
 agentmon at the time of this writing. 
 
@@ -63,10 +63,9 @@ When started, the agentmon program expects a URL passed as an argument
 which speaks the protocol outlined below.
 
 While it'd certainly be possible to report metrics to other services,
-and via other means, the only reporter shipping with agentmon is a
-simple reporter for Heroku's Application Metrics service. This 
-endpoint is POST'ed to over HTTPS, with a few optional headers,
-and a simple JSON body.
+the only reporter shipping with agentmon is a simple reporter for
+Heroku's Application Metrics service. This endpoint is POST'ed to over
+HTTPS, with a few optional headers, and a simple JSON body.
 
 The `Content-Type` header should be `application/json`. Optionally,
 the header `Measurements-Time` can be set to an RFC3339 timestamp,
@@ -107,10 +106,9 @@ A HTTP 200 OK, with no body is returned on success.
 ## Receiving Metrics via statsd over UDP
 
 When the program is started with `-statsd-addr IPV4:PORT`, the program
-creates a UDP listener to receive UDP packets, with statsd formatted
-measurements contained with them. Statsd style counts and gauges will
-be handled as described above. Timers and histograms are silently
-ignored.
+creates a UDP listener to receive UDP packets containing statsd
+formatted measurements. Statsd style counts and gauges will be handled
+as described above. Timers and histograms are silently ignored.
 
 ## Scraping Metrics via Prometheus.
 
