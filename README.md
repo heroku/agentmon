@@ -4,17 +4,20 @@
 
 ## Overview
 
-The `agentmon` application reads language metrics from a [Prometheus](https://github.com/prometheus/prometheus) 
-or a [StatsD](https://github.com/b/statsd_spec) source, then translates and aggregates the metrics 
-data to a format expected by the language metrics sink.  It posts the data to the language metrics sink located at `https://app.metrics.heroku.com`.
-A typical use case would be to add `agentmon` to a buildpack and set an environment variable 
-`HEROKU_METRICS_URL` to `https://app.metrics.heroku.com/<dyno id>`. `agentmon` will 
-read the language metrics sink URL from the environment variable when it starts and use
-it to post language metrics. 
+The `agentmon` application reads language metrics from
+a [Prometheus][prometheus] or a [StatsD][statsd] source, then
+translates and aggregates the metrics data to a format expected by the
+language metrics sink.  It posts the data to the language metrics sink
+located at `https://app.metrics.heroku.com`.  A typical use case would
+be to add `agentmon` to a buildpack and set an environment variable
+`HEROKU_METRICS_URL` to `https://app.metrics.heroku.com/<dyno
+id>`. `agentmon` will read the language metrics sink URL from the
+environment variable when it starts and use it to post language
+metrics.
  
 ```bash
 usage: agentmon [flags] sink-URL 
- -backlog int
+  -backlog int
         Size of pending measurement buffer (default 1000)
   -debug
         debug mode is more verbose
@@ -47,8 +50,10 @@ make build
 make release 
 ```
 
-
-
 ## Copyright
 
 (c) 2017, Heroku, Inc. See [LICENSE](./LICENSE) for details.
+
+
+[prometheus]: https://github.com/prometheus/prometheus
+[statsd]: https://github.com/b/statsd_spec
