@@ -82,16 +82,16 @@ The JSON payload is quite simple:
 ```json
 {
    "counters": { 
-      COUNTER_NAME_1: COUNTER_VALUE_1,
-      COUNTER_NAME_2: COUNTER_VALUE_2,
-      ...
-      COUNTER_NAME_N: COUNTER_VALUE_N
+      "COUNTER_NAME_1": 1.0,
+      "COUNTER_NAME_2": 2.0,
+      "...": 0.000,
+      "COUNTER_NAME_N": 100.0,
    },
    "gauges": { 
-      GAUGE_NAME_1: GAUGE_VALUE_1,
-      GAUGE_NAME_2: GAUGE_VALUE_2,
-      ...
-      GAUGE_NAME_N: GAUGE_VALUE_N
+      "GAUGE_NAME_1": 1.0,
+      "GAUGE_NAME_2": 2.0,
+      "...": 0.000,
+      "GAUGE_NAME_N": 100.0,
    }
 }
 ```
@@ -117,18 +117,22 @@ INT`, a [Prometheus][prometheus] scraper scrapes the endpoint every
 `INT` seconds, and stores the metrics locally pending the flush
 interval.
 
-There are a few quirky items to discuss in this process. Gauges in
-Prometheus are directly compatible with our interpretation. Counters
-are treated as derived counters (see above). We drop Histograms due to
-the less than meaningful data it would provide in our context, but we
-_do_ capture and report at least the non-quantile values from the
-Summary type. These values are reported as, again, derived counters
-with special names: `{name of metric}_sum + rest` and `{name of
-metric}_count + rest`. `rest`, in this case is a statsd encoding of
-the label pairs (with name and value separated by `_`) in the parse
-order of the metric.
+There are a few quirky items to discuss in this
+process. [Gauges][gauges] in Prometheus are directly compatible with
+our interpretation. [Counters][counters] are treated as derived
+counters (see above). We drop Histograms due to the less than
+meaningful data it would provide in our context, but we _do_ capture
+and report at least the non-quantile values from
+the [Summary][summaries] type. These values are reported as, again,
+derived counters with special names: `{name of metric}_sum + rest` and
+`{name of metric}_count + rest`. `rest`, in this case is a statsd
+encoding of the label pairs (with name and value separated by `_`) in
+the parse order of the metric.
 
 
 [statsd]: https://github.com/b/statsd_spec
 [etsy-statsd]: https://github.com/etsy/statsd
 [prometheus]: https://prometheus.io
+[counters]: https://prometheus.io/docs/concepts/metric_types/#counter
+[gauges]: https://prometheus.io/docs/concepts/metric_types/#gauge
+[summaries]: https://prometheus.io/docs/concepts/metric_types/#summary
