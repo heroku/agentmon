@@ -26,6 +26,6 @@ if [ ${#tools} -ne 0 ]; then
 fi
 
 ${S3CMD} put -P $1 ${BUCKET}
-echo "https://agentmon-releases.s3.amazonaws.com/$1" >> latest
+echo "https://agentmon-releases.s3.us-east-1.amazonaws.com/$1" >> latest
 ${S3CMD} put -P latest ${BUCKET}
 rm latest
