@@ -166,7 +166,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 				if err == io.EOF {
 					break
 				}
-				log.Fatalln("fetchFamilies: read-pb: failed: %s", err)
+				log.Fatalf("fetchFamilies: read-pb: failed: %s", err)
 			}
 			p.debugMF("protobuff mf", mf)
 			ch <- mf
@@ -181,7 +181,7 @@ func (p Poller) fetchFamilies(ctx context.Context, ch chan<- *dto.MetricFamily) 
 		metricFamilies, err := parser.TextToMetricFamilies(resp.Body)
 
 		if err != nil {
-			log.Fatalln("fetchFamilies: read-text: failed: %s", err)
+			log.Fatalf("fetchFamilies: read-text: failed: %s", err)
 		}
 		for _, mf := range metricFamilies {
 			p.debugMF("non protobuff mf", mf)
