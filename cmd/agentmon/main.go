@@ -138,7 +138,7 @@ func startReporter(ctx context.Context, i time.Duration, rURL string, inbox chan
 func startPromPoller(ctx context.Context, u string, inbox chan *agentmon.Measurement, debug bool) {
 	pu, err := url.Parse(u)
 	if err != nil {
-		log.Fatal("Invalid Prometheus URL: %s", err)
+		log.Fatalf("Invalid Prometheus URL: %s", err)
 	}
 
 	poller := prom.Poller{

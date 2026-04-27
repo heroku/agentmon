@@ -196,7 +196,7 @@ func TestSummaryNaming(t *testing.T) {
 
 	out, ok := familyToMeasurements(family)
 	if !ok {
-		t.Fatalf("got %b, want true", ok)
+		t.Fatalf("got %t, want true", ok)
 	}
 	if len(out) != 2 {
 		t.Fatalf("got len(%d), want len(2)", len(out))
