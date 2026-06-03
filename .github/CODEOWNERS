@@ -1,3 +1,10 @@
+# Default to requesting pull request reviews from the Heroku Languages team.
 #ECCN:Open Source
 #GUSINFO:Heroku - Languages,Heroku Ruby Platform
 * @heroku/languages
+
+# However, request review from the language owner instead for files that are updated
+# by Dependabot, to reduce team review request noise.
+go.mod @schneems
+go.sum @schneems
+/.github/workflows/ @schneems
